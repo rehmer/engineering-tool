@@ -29,13 +29,15 @@ Library controls support Windows desktop Excel. Libraries are not included in th
 3. Enable this workbook's macros when appropriate, then click **Apply / test libraries**. Repeat Apply each time you open Excel. The connection status reports setup problems.
 4. Use **D6** to choose the preferred package for the existing calculators' Property Package mode. The temperature-rise tab uses its own explicit C22 choice.
 
-This workbook calls the CoolProp DLL directly; `CoolProp.xlam` is not required. Paths start blank so each user can choose their own installation. If a loaded path changes, save and close all Excel windows before reopening and applying. Setup does not change system environment variables or Excel security settings.
+This workbook calls the CoolProp DLL directly; `CoolProp.xlam` is not required. The current saved workbook contains the author's local CoolProp 8.0.0 DLL path. Replace D7 with your own installation path before applying. If a loaded path changes, save and close all Excel windows before reopening and applying. Setup does not change system environment variables or Excel security settings.
+
+The latest setup-status formula assumes the 64-bit DLL filename, although the underlying VBA still includes a 32-bit loader. A 32-bit installation may therefore show an incorrect filename warning in D10.
 
 See the official [CoolProp Excel installation documentation](https://coolprop.org/coolprop/wrappers/Excel/index.html) and [REFPROP backend/path documentation](https://coolprop.org/coolprop/REFPROP.html). The standalone helper source is in [`vba/PropertySetup.bas`](vba/PropertySetup.bas); its procedures are already embedded in the workbook, so users should not import it again.
 
 ## Validation and limits
 
-The updated workbook passed 37 checks in Windows 64-bit Excel, covering all ten calculated-mode gases, macro-disabled recalculation, live CoolProp properties, heating/cooling, segment refinement, adiabatic energy conservation at the tested flow, all four flow units, invalid paths, unsupported fluids, missing packages, save/reopen, and preservation of the temperature profile chart.
+The prior guide/property-selector update passed 37 checks in Windows 64-bit Excel, covering all ten calculated-mode gases, macro-disabled recalculation, live CoolProp properties, heating/cooling, segment refinement, adiabatic energy conservation at the tested flow, all four flow units, invalid paths, unsupported fluids, missing packages, save/reopen, and preservation of the temperature profile chart. The latest user-saved workbook was separately checked in Excel: its saved CoolProp 8.0.0 path loaded successfully, and both CoolProp and Calculated modes returned OK for its saved argon heating case.
 
 Successful REFPROP calculations and 32-bit Excel have not been tested. The temperature model remains a segmented, horizontal, steady, single-phase approximation; the guide explains the low-pressure calculated correlations and the limits of the heat-transfer and pressure-loss model. Other calculators retain their existing equations and fallback behavior and have not undergone a full engineering audit.
 
@@ -48,6 +50,8 @@ Successful REFPROP calculations and 32-bit Excel have not been tested. The tempe
 ## Version history
 
 The initial commit preserves the supplied workbook and PDFs without modification. The current workbook adds the guide, portable library setup, and the temperature-rise property selector. Source PDFs remain unchanged.
+
+The latest user-saved update revises the DLL path and setup-status formula, adds future-session guidance, moves the guide's reference table with its dependent lookups, and saves new example inputs. Embedded VBA and the underlying engineering equations are unchanged from the preceding version.
 
 Save workbook changes in `workbook/ENGINEERING TOOL.xlsm` and commit with a description of the change. Excel workbooks and PDFs are binary files, so GitHub does not show ordinary line-by-line diffs for them.
 
