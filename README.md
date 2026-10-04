@@ -2,13 +2,20 @@
 
 Excel engineering workbook and its associated source documents.
 
-## Workbook
+## Workbooks
 
-[Download ENGINEERING TOOL.xlsm](workbook/ENGINEERING%20TOOL.xlsm)
+- [Download engineering tools.xlsx](workbook/engineering%20tools.xlsx) — self-contained version without VBA, DLLs, or live property lookups. Includes the high-pressure gas ranges, water flow in the Fixed Orifice and Cv calculators, and the reference-based Cd calculator.
+- [Download engineering tools - property lookup.xlsm](workbook/engineering%20tools%20-%20property%20lookup.xlsm) — macro-enabled version with CoolProp/REFPROP property-library support.
 
-Download the workbook using GitHub's **Download raw file** button and open it in Microsoft Excel desktop. Keep the `.xlsm` format to preserve VBA macros. GitHub stores and versions the file; the workbook runs locally in Excel.
+Download the selected workbook using GitHub's **Download raw file** button and open it in Microsoft Excel desktop. Preserve its file extension. GitHub stores and versions the files; the workbooks run locally in Excel.
 
-## Getting started
+## Self-contained version
+
+In **engineering tools.xlsx**, open **Guide & Setup** for operating limits and model assumptions. Gas calculations support 250–600 K, with air, nitrogen, argon and helium up to 7,000 psig, and hydrogen up to 10,000 psig. Other gases retain the 100 bar absolute ceiling. High-pressure properties and flow are engineering estimates; the workbook displays limitations and sampled reference comparisons.
+
+The Fixed Orifice and Cv sheets also support liquid water from 33.8–194°F, up to 100 bar absolute. They flag flashing, cavitation limitations and missing device pressure-recovery factors. This version passed 200 calculation and boundary checks in desktop Excel. It needs no property-library setup.
+
+## Property-lookup version: getting started
 
 Open **Guide & Setup**, the first worksheet, for a tour of all eight calculators/data tabs, unit conventions, model assumptions, and troubleshooting.
 
@@ -20,7 +27,7 @@ Open **Guide & Setup**, the first worksheet, for a tour of all eight calculators
 
 Unavailable packages and unsupported fluids produce an explicit status and unavailable results on this tab; they do not silently switch methods.
 
-## Configure property libraries
+## Property-lookup version: configure property libraries
 
 Library controls support Windows desktop Excel. Libraries are not included in this repository.
 
@@ -35,7 +42,7 @@ The latest setup-status formula assumes the 64-bit DLL filename, although the un
 
 See the official [CoolProp Excel installation documentation](https://coolprop.org/coolprop/wrappers/Excel/index.html) and [REFPROP backend/path documentation](https://coolprop.org/coolprop/REFPROP.html). The standalone helper source is in [`vba/PropertySetup.bas`](vba/PropertySetup.bas); its procedures are already embedded in the workbook, so users should not import it again.
 
-## Validation and limits
+## Property-lookup version: validation and limits
 
 The prior guide/property-selector update passed 37 checks in Windows 64-bit Excel, covering all ten calculated-mode gases, macro-disabled recalculation, live CoolProp properties, heating/cooling, segment refinement, adiabatic energy conservation at the tested flow, all four flow units, invalid paths, unsupported fluids, missing packages, save/reopen, and preservation of the temperature profile chart. The latest user-saved workbook was separately checked in Excel: its saved CoolProp 8.0.0 path loaded successfully, and both CoolProp and Calculated modes returned OK for its saved argon heating case.
 
@@ -49,11 +56,13 @@ Successful REFPROP calculations and 32-bit Excel have not been tested. The tempe
 
 ## Version history
 
-The initial commit preserves the supplied workbook and PDFs without modification. The current workbook adds the guide, portable library setup, and the temperature-rise property selector. Source PDFs remain unchanged.
+The initial commit preserves the supplied workbook and PDFs without modification. The property-lookup workbook adds the guide, portable library setup, and the temperature-rise property selector. Source PDFs remain unchanged.
 
 The latest user-saved update revises the DLL path and setup-status formula, adds future-session guidance, moves the guide's reference table with its dependent lookups, and saves new example inputs. Embedded VBA and the underlying engineering equations are unchanged from the preceding version.
 
-Save workbook changes in `workbook/ENGINEERING TOOL.xlsm` and commit with a description of the change. Excel workbooks and PDFs are binary files, so GitHub does not show ordinary line-by-line diffs for them.
+The self-contained high-pressure/water version is named `workbook/engineering tools.xlsx`. The macro-enabled property-library version is named `workbook/engineering tools - property lookup.xlsm`. Both files were renamed without changing their contents.
+
+Save changes in the appropriate workbook and commit with a description of the change. Excel workbooks and PDFs are binary files, so GitHub does not show ordinary line-by-line diffs for them.
 
 ## Rights
 
