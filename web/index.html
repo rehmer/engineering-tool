@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Engineering Clarity</title>
+<meta name="description" content="Free engineering calculators for gas flow, relief valves, orifices, valves, pipe heat transfer and beams, each with its theory, checks and a calc record for your report.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 26'%3E%3Crect x='1' y='1' width='24' height='24' rx='5' fill='%231f4e78'/%3E%3Cpath d='M5 17h5l2.5-8 3 10 2-5H21' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="app/styles.css">
+</head>
+<body>
+<header class="appbar">
+  <div class="logo">
+    <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="1" width="24" height="24" rx="5" fill="var(--brand)"/><path d="M5 17h5l2.5-8 3 10 2-5H21" fill="none" stroke="var(--surface)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span id="brand">Engineering Clarity</span>
+  </div>
+  <span class="pill" id="ver"></span>
+  <span class="spacer"></span>
+  <button class="ibtn fbbtn" type="button" id="feedback">Feedback</button>
+  <div class="projsel">
+    <label for="proj">Project</label>
+    <select id="proj"></select>
+    <button class="ibtn" type="button" id="proj-edit">Edit</button>
+    <button class="ibtn" type="button" id="proj-new">New</button>
+  </div>
+</header>
+
+<div class="shell">
+  <nav class="rail" aria-label="Tools and cases">
+    <div class="grp">Tools</div>
+    <div id="tools"></div>
+    <div class="grp">Cases in this project</div>
+    <div class="cases" id="cases"></div>
+    <div class="railfoot">
+      <button class="ibtn" type="button" id="backup">Back up all projects</button>
+      <button class="ibtn" type="button" id="restore">Restore from backup</button>
+      <input type="file" id="restore-file" accept=".json,application/json" hidden>
+      <span class="note" id="storage-note"></span>
+    </div>
+  </nav>
+  <main>
+    <div id="view"></div>
+    <div class="foot noprint">Free to use, provided as is, with no warranty. Results are engineering estimates and must be checked by a qualified engineer before use in design. Your projects stay in this browser. <a href="#/guide">Guide, limits &amp; terms</a> · <button class="linkbtn" type="button" id="feedback-foot">Report a bug or send feedback</button></div>
+  </main>
+</div>
+
+<dialog id="proj-dlg">
+  <form method="dialog">
+    <h2 id="proj-dlg-h">Project</h2>
+    <label>Project name<input name="name" required></label>
+    <label>Project number<input name="number"></label>
+    <label>Client<input name="client"></label>
+    <label>Your name (prepared by)<input name="preparer"></label>
+    <div class="actions">
+      <button class="ibtn danger" value="delete" id="proj-del" formnovalidate>Delete project</button>
+      <span class="spacer" style="flex:1"></span>
+      <button class="ibtn" value="cancel" formnovalidate>Cancel</button>
+      <button class="ibtn primary" value="save">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<script type="module" src="app/main.js"></script>
+</body>
+</html>
