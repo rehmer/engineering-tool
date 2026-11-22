@@ -284,12 +284,12 @@ export default {
   method: {
     basis: "Integrated momentum balance for compressible flow with friction along a Pv^c = constant path (polytropic approximation). The mass flow is solved so the available pressure term equals the friction and fitting losses divided by Y².",
     equations: [
-      "Residual = P₁·x_used − Δz·ρ·g − ρ·g·Σh_L / Y²  →  0",
-      "V = 0.2486·ṁ[lb/hr] / (ρ·ID[in]²);  Re = ρ·V·D/μ;  f = 64/Re (Re < 2300), Swamee–Jain otherwise",
-      "K_pipe = f·L/D;  K_fitting = Qty·(Le/D)·f;  K_entrance = 0.5;  K_exit = 1.0;  Σh_L = K·V²/(2g)",
-      "c = 1 + 1.8·x·(k − 1)/(K + 1)  (Eq. 25);  c = 1 isothermal;  c = k isentropic",
-      "Y = √{ [c/((c+1)·x)] · [(1−x)^((c+1)/c) − 1] / [(2/(c·K))·ln(1−x) − 1] }",
-      "x_ch = exp[−exp(0.43 − 0.6k − 0.43·ln K)]  (Eq. 34, valid K ≥ 1);  x_used = min(x, x_ch)",
+      { note: "Mass flow is solved so the residual is zero", tex: String.raw`P_1\,x_{\mathrm{used}} - \Delta z\,\rho\,g - \frac{\rho\,g\,\sum h_L}{Y^2} = 0` },
+      { note: "Velocity (ṁ in lb/hr, ID in inches), Reynolds number and friction factor (Swamee–Jain above Re 2300)", tex: String.raw`V = \frac{0.2486\,\dot m}{\rho\,\mathrm{ID}^2} \qquad \mathrm{Re} = \frac{\rho\,V\,D}{\mu} \qquad f = \frac{64}{\mathrm{Re}}\quad(\mathrm{Re} < 2300)` },
+      { note: "Loss coefficients and head loss", tex: String.raw`K_{\mathrm{pipe}} = f\,\frac{L}{D} \qquad K_{\mathrm{fitting}} = \mathrm{Qty}\cdot\frac{L_e}{D}\,f \qquad K_{\mathrm{entrance}} = 0.5 \qquad K_{\mathrm{exit}} = 1.0 \qquad \sum h_L = \frac{K\,V^2}{2g}` },
+      { note: "Polytropic exponent (Eq. 25); c = 1 isothermal, c = k isentropic", tex: String.raw`c = 1 + \frac{1.8\,x\,(k-1)}{K+1}` },
+      { note: "Expansion factor", tex: String.raw`Y = \sqrt{\frac{\dfrac{c}{(c+1)\,x}\left[(1-x)^{(c+1)/c} - 1\right]}{\dfrac{2}{c\,K}\,\ln(1-x) - 1}}` },
+      { note: "Choked pressure ratio (Eq. 34, valid for K ≥ 1)", tex: String.raw`x_{\mathrm{ch}} = \exp\left[-\exp\left(0.43 - 0.6k - 0.43\,\ln K\right)\right] \qquad x_{\mathrm{used}} = \min(x,\ x_{\mathrm{ch}})` },
     ],
     assumptions: [
       "Steady, single-phase gas, constant bore, horizontal except for the elevation term.",

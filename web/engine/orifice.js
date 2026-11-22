@@ -175,12 +175,11 @@ export default {
   method: {
     basis: "Isentropic flow of an ideal gas through a sharp-edged orifice, multiplied by a discharge coefficient. When the back pressure is at or below the critical pressure the orifice is choked and the flow no longer depends on back pressure.",
     equations: [
-      "P_u = (P_gauge + P_amb) × 6,894.757 Pa/psi;  A = πd²/4",
-      "r_c = [2/(k+1)]^[k/(k−1)];  P_used = max(P_d, r_c·P_u);  r = P_used / P_u",
-      "ṁ = C_d · A · √{ 2k/(k−1) · P_u · ρ_u · r^(2/k) · [1 − r^((k−1)/k)] }",
-      "Wu Eq. 15: C_d = 0.61 [1 + 1.07 e^(−0.126√Re) − 2.07 e^(−0.246√Re)],  Re = ṁ·d / (A·μ)",
-      "Wu mode: 61 fixed-point iterations of Cd → Re → Cd starting from 0.61; accepted when the last change is below 10⁻⁶",
-      "Standard flow: Q_std = ṁ / ρ_std,  ρ_std = ρ(gas, P_std, T_std) by the selected density method;  SCFM = Q_std [m³/s] / 0.0283168 × 60",
+      { note: "Upstream pressure (Pa) and bore area", tex: String.raw`P_u = 6,894.757\,(P_{\mathrm{gauge}} + P_{\mathrm{amb}}) \qquad A = \frac{\pi d^2}{4}` },
+      { note: "Critical pressure ratio and the pressure ratio used", tex: String.raw`r_c = \left(\frac{2}{k+1}\right)^{\frac{k}{k-1}} \qquad P_{\mathrm{used}} = \max(P_d,\ r_c P_u) \qquad r = \frac{P_{\mathrm{used}}}{P_u}` },
+      { note: "Mass flow", tex: String.raw`\dot m = C_d\,A\,\sqrt{\frac{2k}{k-1}\,P_u\,\rho_u\,r^{2/k}\left[1 - r^{(k-1)/k}\right]}` },
+      { note: "Wu Eq. 15. Wu mode runs 61 fixed-point iterations of Cd → Re → Cd from 0.61, accepted when the last change is below 10⁻⁶", tex: String.raw`C_d = 0.61\left[1 + 1.07\,e^{-0.126\sqrt{\mathrm{Re}}} - 2.07\,e^{-0.246\sqrt{\mathrm{Re}}}\right] \qquad \mathrm{Re} = \frac{\dot m\,d}{A\,\mu}` },
+      { note: "Standard flow, with standard density from the selected density method", tex: String.raw`Q_{\mathrm{std}} = \frac{\dot m}{\rho_{\mathrm{std}}} \qquad \rho_{\mathrm{std}} = \rho(\text{gas},\ P_{\mathrm{std}},\ T_{\mathrm{std}}) \qquad \mathrm{SCFM} = \frac{60\,Q_{\mathrm{std}}[\text{m³/s}]}{0.0283168}` },
     ],
     assumptions: [
       "Gas phase only; properties at upstream conditions (ideal gas or Peng-Robinson). Property range 250–600 K, 1 kPa–10 MPa.",

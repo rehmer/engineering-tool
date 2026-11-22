@@ -162,7 +162,7 @@ export default {
       equivalence: eq,
       method: withEq ? {
         basis: `${this.method.basis} Fluid equivalence: ${EQ_METHOD.basis}`,
-        equations: [...this.method.equations, ...EQ_METHOD.equations.map((e) => `Equivalence: ${e}`)],
+        equations: [...this.method.equations, ...EQ_METHOD.equations.map((e) => ({ ...e, note: `Equivalence${e.note ? `: ${e.note}` : ""}` }))],
         assumptions: [...this.method.assumptions, ...EQ_METHOD.assumptions.map((e) => `Equivalence: ${e}`)],
         references: [...this.method.references, ...EQ_METHOD.references],
       } : undefined,
@@ -201,11 +201,11 @@ export default {
   method: {
     basis: "Volume flow is mass flow divided by density. Actual flow uses density at line conditions; standard flow uses density at the reference pressure, temperature and, for air, humidity.",
     equations: [
-      "P_abs = P_gauge + P_ambient;  P[Pa] = P[psi] × 6,895;  T[K] = (T[°F] − 32)·5/9 + 273.15",
-      "ρ_ideal = P·M / (R·T),  R = 8.314 Pa·m³/(mol·K)",
-      "Air: ρ = [(P − p_v)·0.02896546 + p_v·0.01801528] / (R·T),  p_v = RH · p_sat(T)  (Huang 2018)",
-      "Peng-Robinson: Z from the PR cubic (gas root), ρ = P·M / (Z·R·T)",
-      "ACFM = ṁ[lb/hr] / (ρ_actual × 0.062428) / 60;  SCFM = ṁ / (ρ_ref × 0.062428) / 60;  m³/hr = ṁ[kg/hr] / ρ_ref",
+      { note: "Absolute pressure and unit conversions", tex: String.raw`P_{\mathrm{abs}} = P_{\mathrm{gauge}} + P_{\mathrm{ambient}} \qquad P[\mathrm{Pa}] = 6,895\,P[\mathrm{psi}] \qquad T[\mathrm{K}] = \frac{5}{9}\left(T[\mathrm{°F}] - 32\right) + 273.15` },
+      { note: "Ideal gas", tex: String.raw`\rho_{\mathrm{ideal}} = \frac{P\,M}{R\,T} \qquad R = 8.314\ \text{Pa·m³/(mol·K)}` },
+      { note: "Humid air (Huang 2018)", tex: String.raw`\rho = \frac{(P-p_v)\cdot 0.02896546 + p_v\cdot 0.01801528}{R\,T} \qquad p_v = \mathrm{RH}\cdot p_{\mathrm{sat}}(T)` },
+      { note: "Peng-Robinson: Z from the PR cubic (gas root)", tex: String.raw`\rho = \frac{P\,M}{Z\,R\,T}` },
+      { note: "Volume flows (ṁ in lb/hr for ACFM and SCFM, kg/hr for m³/hr)", tex: String.raw`\mathrm{ACFM} = \frac{\dot m}{60 \times 0.062428\,\rho_{\mathrm{actual}}} \qquad \mathrm{SCFM} = \frac{\dot m}{60 \times 0.062428\,\rho_{\mathrm{ref}}} \qquad \text{m³/hr} = \frac{\dot m}{\rho_{\mathrm{ref}}}` },
     ],
     assumptions: [
       "Single-phase gas; property range 250–600 K and 1 kPa–10 MPa abs, with a saturation screen.",

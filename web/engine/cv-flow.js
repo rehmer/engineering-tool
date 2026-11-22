@@ -104,10 +104,10 @@ export default {
   method: {
     basis: "Legacy ISA S75.01-1989 gas correlation for flow through a valve of known Cv. Flow is calculated in SCFM at 14.7 psia and 60 °F, then converted to mass flow with the standard density and to actual and normal flow with the densities at those states.",
     equations: [
-      "P₁, P₂ absolute (psia);  Δp = P₁ − P₂;  T₁ in °R;  G_g = M / 28.965",
-      "Low pressure drop (P₂ > 0.5·P₁):  q = N₂ · Cv · P₁ · (1 − 2Δp/(3P₁)) · √[Δp / (P₁·G_g·T₁)]",
-      "Choked (P₂ ≤ 0.5·P₁):  q = 0.471 · N₂ · Cv · P₁ / √(G_g·T₁),   N₂ = 22.67",
-      "ṁ = q × 0.0283168 / 60 × ρ_std;   Nm³/h = ṁ / ρ_ref × 3600;   ACFM = ṁ / ρ₁ × 60 / 0.0283168",
+      { note: "P₁ and P₂ absolute (psia), T₁ in °R", tex: String.raw`\Delta p = P_1 - P_2 \qquad G_g = \frac{M}{28.965}` },
+      { note: "Low pressure drop, P₂ > 0.5·P₁", tex: String.raw`q = N_2\,C_v\,P_1\left(1-\frac{2\,\Delta p}{3\,P_1}\right)\sqrt{\frac{\Delta p}{P_1\,G_g\,T_1}}` },
+      { note: "Choked, P₂ ≤ 0.5·P₁", tex: String.raw`q = \frac{0.471\,N_2\,C_v\,P_1}{\sqrt{G_g\,T_1}} \qquad N_2 = 22.67` },
+      { note: "Mass flow and other volume flows", tex: String.raw`\dot m = \frac{0.0283168\,q}{60}\,\rho_{\mathrm{std}} \qquad \text{Nm³/h} = \frac{3600\,\dot m}{\rho_{\mathrm{ref}}} \qquad \mathrm{ACFM} = \frac{60\,\dot m}{0.0283168\,\rho_1}` },
     ],
     assumptions: [
       "The correlation assumes ideal gas behaviour and switches to choked flow at a fixed P₂/P₁ = 0.5. It does not use the valve's pressure-drop ratio factor xT or the specific-heat factor Fk.",

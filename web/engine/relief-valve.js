@@ -117,11 +117,11 @@ export default {
   method: {
     basis: "API 520 Part I gas sizing equations, rearranged to give capacity for a known effective area. The critical (sonic) equation applies when the back pressure ratio is at or below the critical pressure ratio; otherwise the subcritical equation with coefficient F₂ applies.",
     equations: [
-      "P₁ = (P_relieving + P_amb) × 6.894757 kPa/psi;  r = P₂/P₁;  r_c = [2/(k+1)]^[k/(k−1)]",
-      "C = 0.03948 · √{ k · [2/(k+1)]^[(k+1)/(k−1)] }",
-      "Critical (Eq. 3.6):  W = A · C · K_d · K_b · K_c · P₁ · √[M / (T·Z)]    (W kg/h, A mm², P kPa abs, T K)",
-      "F₂ = √{ [k/(k−1)] · r^(2/k) · [1 − r^((k−1)/k)] / (1 − r) }",
-      "Subcritical (Eq. 3.8):  W = A · F₂ · K_d · K_c / 17.9 · √[ M · P₁ · (P₁ − P₂) / (T·Z) ]",
+      { note: "Pressures in kPa absolute", tex: String.raw`P_1 = 6.894757\,(P_{\mathrm{relieving}} + P_{\mathrm{amb}}) \qquad r = \frac{P_2}{P_1} \qquad r_c = \left(\frac{2}{k+1}\right)^{\frac{k}{k-1}}` },
+      { note: "Gas coefficient", tex: String.raw`C = 0.03948\,\sqrt{k\left(\frac{2}{k+1}\right)^{\frac{k+1}{k-1}}}` },
+      { note: "Critical flow, Eq. 3.6 (W kg/h, A mm², P kPa abs, T K)", tex: String.raw`W = A\,C\,K_d\,K_b\,K_c\,P_1\sqrt{\frac{M}{T\,Z}}` },
+      { note: "Subcritical coefficient", tex: String.raw`F_2 = \sqrt{\frac{k}{k-1}\,r^{2/k}\,\frac{1 - r^{(k-1)/k}}{1-r}}` },
+      { note: "Subcritical flow, Eq. 3.8", tex: String.raw`W = \frac{A\,F_2\,K_d\,K_c}{17.9}\sqrt{\frac{M\,P_1\,(P_1 - P_2)}{T\,Z}}` },
     ],
     assumptions: [
       "Gas phase only. Pressures in the equations are absolute; the back pressure is entered in psia.",

@@ -5,6 +5,7 @@ import { ENGINE_VERSION, fingerprint } from "../engine/index.js";
 import { FITTINGS } from "../engine/pipe-flow.js";
 import { fmt, cell, resultValue, esc, today } from "./format.js";
 import { SITE_NAME } from "./config.js";
+import { texToMathML, eqEntry } from "./math.js";
 
 const LEVEL = { ok: "OK", warn: "CHECK", bad: "FAIL" };
 
@@ -59,7 +60,7 @@ function table(cols, rows, numCol = -1, widths = []) {
     const color = x === "FAIL" ? "color:#b3372d;font-weight:bold;" : x === "CHECK" ? "color:#a86a12;font-weight:bold;" : x === "OK" ? "color:#2c7a47;" : "";
     return `<td style="${TD}${i === numCol ? "text-align:right;font-family:Consolas,monospace;" : ""}${color}">${esc(x)}</td>`;
   }).join("") + "</tr>").join("");
-  return `<table style="border-collapse:collapse;width:100%;margin:0 0 6pt;"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
+  return `<table width="100%" style="border-collapse:collapse;width:100%;margin:0 0 6pt;"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
 }
 
 export function recordHTML(rec) {
@@ -69,10 +70,10 @@ export function recordHTML(rec) {
   const stColor = st.level === "ok" ? "#2c7a47" : st.level === "warn" ? "#a86a12" : "#b3372d";
   let n = 0; const sec = (t) => `<p style="${H}">${++n}. ${esc(t)}</p>`;
   return `<div style="${F}color:#15202b;">
-<table style="border-collapse:collapse;width:100%;margin-bottom:8pt;"><tr>
+<table width="100%" style="border-collapse:collapse;width:100%;margin-bottom:8pt;"><tr>
 <td style="${F}font-size:16pt;font-weight:bold;color:#1f4e78;border-bottom:2px solid #1f4e78;padding:0 0 4pt;">Calculation record: ${esc(rec.tool.title)}</td>
 <td style="${F}font-size:10pt;text-align:right;border-bottom:2px solid #1f4e78;padding:0 0 4pt;white-space:nowrap;">Record ${esc(rec.recordId)}</td></tr></table>
-<table style="border-collapse:collapse;width:100%;margin-bottom:6pt;">
+<table width="100%" style="border-collapse:collapse;width:100%;margin-bottom:6pt;">
 ${metaRow("Project", m.project, "Project no.", m.number)}
 ${metaRow("Case", m.caseName, "Client", m.client)}
 ${metaRow("Prepared by", m.preparedBy, "Date", m.date)}
@@ -85,7 +86,7 @@ ${rec.results.length ? table(["Result", "Value", "Unit"], rec.results, 1, ["55%"
 ${sec("Checks")}${table(["Check", "Result", "Detail"], rec.checks, -1, ["40%", "10%", "50%"])}
 ${rec.advice ? `${sec("Model selection")}<p style="${P}">Selected: <b>${esc(rec.advice.selected)}</b>. Selection guide recommends: <b>${esc(rec.advice.recommended)}</b>. ${esc(rec.advice.why)}</p>` : ""}
 ${sec("Method and basis")}<p style="${P}">${esc(rec.method.basis)}</p>
-${rec.method.equations.map((e) => `<p style="${P}font-family:Consolas,monospace;font-size:9pt;margin-left:12pt;">${esc(e)}</p>`).join("")}
+${rec.method.equations.map(eqEntry).map(({ note, tex }) => `${note ? `<p style="${P}font-size:9pt;color:#5a6a7a;margin:6pt 0 0 12pt;page-break-after:avoid;">${esc(note)}</p>` : ""}${tex ? `<div style="margin:2pt 0 4pt 12pt;font-size:11pt;">${texToMathML(tex)}</div>` : ""}`).join("")}
 <p style="${P}margin-top:6pt;"><b>Assumptions and limits</b></p>
 <ul style="${F}font-size:10pt;margin:0 0 4pt 0;padding-left:18pt;">${rec.method.assumptions.map((a) => `<li>${esc(a)}</li>`).join("")}</ul>
 ${sec("References")}<ul style="${F}font-size:10pt;margin:0;padding-left:18pt;">${rec.method.references.map((a) => `<li>${esc(a)}</li>`).join("")}</ul>

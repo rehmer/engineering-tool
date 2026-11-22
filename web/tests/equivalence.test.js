@@ -80,5 +80,5 @@ test("calc record includes the equivalence only when asked", () => {
   const recOn = buildRecord(on.tool, on.inputs, on.result, {});
   assert.ok(recOn.inputs.some((r) => r[0] === "Equivalence: tested fluid"));
   assert.ok(recOn.results.some((r) => /equivalent flow, Nitrogen/.test(r[0])));
-  assert.ok(recOn.method.equations.some((e) => /Equivalence/.test(e)));
+  assert.ok(recOn.method.equations.some((e) => /Equivalence/.test(e.note)));
 });

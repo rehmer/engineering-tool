@@ -131,13 +131,14 @@ export function equivalenceReport(i) {
 export const EQ_METHOD = {
   basis: "A device tested or rated in standard flow of one gas passes a different standard flow of another gas. Flow through a fixed restriction depends on the gas density at the inlet and, once compressibility matters, on its heat capacity ratio k. Each gas's standard flow is its mass flow divided by its own standard density at the same reference state, so the ratio between gases depends only on the gases and the pressures, not on the size of the device.",
   equations: [
-    "Q_std = ṁ / ρ_std;   for the same device:  Q_B / Q_A = (ṁ_B / ρ_std,B) / (ṁ_A / ρ_std,A)",
-    "Isentropic nozzle: ṁ = C·A·√(P₁·ρ₁)·ψ(k, r),  r = P₂/P₁",
-    "ψ = √[2k/(k−1) · (r^(2/k) − r^((k+1)/k))]  for r > r_c;   ψ = √k · (2/(k+1))^((k+1)/(2(k−1)))  for r ≤ r_c (choked)",
-    "r_c = (2/(k+1))^(k/(k−1));   k = c_p0 / (c_p0 − R) at the inlet temperature",
-    "Nozzle, ideal gas:  Q_B/Q_A = (ψ_B/ψ_A) · √(M_A·Z_A / (M_B·Z_B))",
-    "Square-root SG rule (small ΔP):  ṁ = C·A·√(2·ρ₁·ΔP)  ⇒  Q_B/Q_A = √(M_A/M_B) = √(SG_A/SG_B) for ideal gases",
-    "Same mass flow:  Q_B/Q_A = ρ_std,A / ρ_std,B = M_A/M_B for ideal gases",
+    { note: "Standard flow, and the ratio for the same device", tex: String.raw`Q_{\mathrm{std}} = \frac{\dot m}{\rho_{\mathrm{std}}} \qquad \frac{Q_B}{Q_A} = \frac{\dot m_B/\rho_{\mathrm{std},B}}{\dot m_A/\rho_{\mathrm{std},A}}` },
+    { note: "Isentropic nozzle", tex: String.raw`\dot m = C\,A\,\sqrt{P_1\,\rho_1}\;\psi(k,\ r) \qquad r = \frac{P_2}{P_1}` },
+    { note: "Subcritical, r above the critical ratio", tex: String.raw`\psi = \sqrt{\frac{2k}{k-1}\left(r^{2/k} - r^{(k+1)/k}\right)}` },
+    { note: "Choked, r at or below the critical ratio", tex: String.raw`\psi = \sqrt{k}\left(\frac{2}{k+1}\right)^{\frac{k+1}{2(k-1)}}` },
+    { note: "Critical ratio, with k at the inlet temperature", tex: String.raw`r_c = \left(\frac{2}{k+1}\right)^{\frac{k}{k-1}} \qquad k = \frac{c_{p0}}{c_{p0} - R}` },
+    { note: "Nozzle, ideal gas", tex: String.raw`\frac{Q_B}{Q_A} = \frac{\psi_B}{\psi_A}\sqrt{\frac{M_A\,Z_A}{M_B\,Z_B}}` },
+    { note: "Square-root SG rule (small ΔP), last steps for ideal gases", tex: String.raw`\dot m = C\,A\,\sqrt{2\,\rho_1\,\Delta P} \;\Rightarrow\; \frac{Q_B}{Q_A} = \sqrt{\frac{M_A}{M_B}} = \sqrt{\frac{\mathrm{SG}_A}{\mathrm{SG}_B}}` },
+    { note: "Same mass flow, last step for ideal gases", tex: String.raw`\frac{Q_B}{Q_A} = \frac{\rho_{\mathrm{std},A}}{\rho_{\mathrm{std},B}} = \frac{M_A}{M_B}` },
   ],
   assumptions: [
     "Same device and the same effective area C·A for both gases: the discharge coefficient is taken as unchanged. Reynolds-number and viscosity effects are ignored; they matter most for light gases (hydrogen, helium) and small or laminar flow elements.",

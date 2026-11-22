@@ -1,5 +1,10 @@
 # Changelog
 
+## Engine 0.3.1 (2026-11-22)
+
+- Method equations are written in LaTeX and drawn as typeset math in the Theory panel, the calc record, Print / Save PDF and Copy for Word. Pasted into Word they become native, editable Word equations. No result changes.
+- Copy for Word: tables now fit the page width, and each equation label stays on the same page as its equation.
+
 ## Engine 0.3.0 (2026-11-22)
 
 - Fixed Orifice Gas Flow 1.1.0: asks for standard conditions (default 14.696 psia and 60 °F) and reports standard volume flow in SCFM (headline), SCFH and std m³/hr, plus actual ACFM at the upstream state. Standard density uses the selected density method at the standard state. Mass flow and every workbook result are unchanged. Not in the workbook; tested in `tests/orifice-standard.test.js`.

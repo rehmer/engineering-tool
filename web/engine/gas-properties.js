@@ -71,11 +71,12 @@ export default {
   method: {
     basis: "Peng-Robinson cubic equation of state with ideal-gas heat capacity polynomials fitted to CoolProp over 250–600 K. Ideal gas sets Z = 1 and uses the ideal heat capacities. The same engine supplies every gas tool on this site.",
     equations: [
-      "P = RT/(v − b) − a(T)/(v² + 2bv − b²);  a = 0.45724 R²Tc²/Pc · [1 + m(1 − √(T/Tc))]²;  b = 0.0778 R Tc/Pc",
-      "m = 0.37464 + 1.54226ω − 0.26992ω²;  Z from the cubic (largest real root)",
-      "c_p0 = Σ c_i (T/300)^i, i = 0…4;  h = ∫c_p0 dT from 298.15 K + PR departure",
-      "c_v = c_p0 − R + T(d²a/dT²)/(2√2 b)·ln[(Z + 2.414B)/(Z − 0.414B)];  c_p = c_v − T(∂P/∂T)²/(∂P/∂v)",
-      "Speed of sound c = √(−v²·(c_p/c_v)·(∂P/∂v)/M);  μ = μ₃₀₀(T/300)^0.7;  λ = λ₃₀₀(T/300)^0.8",
+      { note: "Peng-Robinson equation of state", tex: String.raw`P = \frac{R\,T}{v-b} - \frac{a(T)}{v^2 + 2bv - b^2}` },
+      { tex: String.raw`a = 0.45724\,\frac{R^2\,T_c^2}{P_c}\left[1 + m\left(1-\sqrt{T/T_c}\right)\right]^2 \qquad b = 0.0778\,\frac{R\,T_c}{P_c}` },
+      { note: "Z from the cubic (largest real root)", tex: String.raw`m = 0.37464 + 1.54226\,\omega - 0.26992\,\omega^2` },
+      { note: "Ideal-gas heat capacity; enthalpy from 298.15 K plus the PR departure", tex: String.raw`c_{p0} = \sum_{i=0}^{4} c_i\left(\frac{T}{300}\right)^{i} \qquad h = \int_{298.15}^{T} c_{p0}\,dT + h_{\mathrm{dep}}` },
+      { note: "Real-gas heat capacities", tex: String.raw`c_v = c_{p0} - R + \frac{T\,(d^2a/dT^2)}{2\sqrt{2}\,b}\,\ln\left[\frac{Z + 2.414B}{Z - 0.414B}\right] \qquad c_p = c_v - \frac{T\,(\partial P/\partial T)^2}{\partial P/\partial v}` },
+      { note: "Speed of sound and transport properties", tex: String.raw`c = \sqrt{-\frac{v^2}{M}\,\frac{c_p}{c_v}\,\frac{\partial P}{\partial v}} \qquad \mu = \mu_{300}\left(\frac{T}{300}\right)^{0.7} \qquad \lambda = \lambda_{300}\left(\frac{T}{300}\right)^{0.8}` },
     ],
     assumptions: [
       "Envelope 250–600 K and 0.01–100 bar abs. Below 1.05·Tc a conservative Wilson screen rejects states near condensation; this is not a phase-equilibrium calculation.",

@@ -195,11 +195,12 @@ export default {
   method: {
     basis: "Euler–Bernoulli beam theory with Roark's closed-form end conditions for each case. The left-end reaction, moment, slope and deflection are the integration constants; shear, moment, slope and deflection anywhere follow from Macaulay (singularity) functions. A 201-point scan plus the exact load point finds the extremes.",
     equations: [
-      "⟨x − a⟩ = max(x − a, 0);  L = l − a;  EI = E × I",
-      "Point load:  V = R_A − W⟨x−a⟩⁰;  M = M_A + R_A x − W⟨x−a⟩",
-      "Linear load:  V = R_A − w_a⟨x−a⟩ − (w_l−w_a)⟨x−a⟩²/(2L);  M = M_A + R_A x − w_a⟨x−a⟩²/2 − (w_l−w_a)⟨x−a⟩³/(6L)",
-      "θ(x) = θ_A + ∫M/EI dx;   y(x) = y_A + θ_A x + ∬M/EI dx",
-      "σ = |M|max / S,  S = I/c;   factor of safety = σ_allow / σ",
+      { note: "Singularity function and loaded length", tex: String.raw`\langle x-a\rangle = \max(x-a,\ 0) \qquad L = l-a` },
+      { note: "Point load W at x = a", tex: String.raw`V = R_A - W\langle x-a\rangle^{0} \qquad M = M_A + R_A\,x - W\langle x-a\rangle` },
+      { note: "Linearly varying load from x = a to x = l", tex: String.raw`V = R_A - w_a\langle x-a\rangle - \frac{(w_l-w_a)\langle x-a\rangle^{2}}{2L}` },
+      { tex: String.raw`M = M_A + R_A\,x - \frac{w_a\langle x-a\rangle^{2}}{2} - \frac{(w_l-w_a)\langle x-a\rangle^{3}}{6L}` },
+      { note: "Slope and deflection", tex: String.raw`\theta(x) = \theta_A + \int \frac{M}{EI}\,dx \qquad y(x) = y_A + \theta_A\,x + \iint \frac{M}{EI}\,dx\,dx` },
+      { note: "Bending stress and factor of safety", tex: String.raw`\sigma = \frac{|M|_{\max}}{S} \qquad S = \frac{I}{c} \qquad \mathrm{FS} = \frac{\sigma_{\mathrm{allow}}}{\sigma}` },
     ],
     assumptions: [
       "Small deflections, linear elastic material, constant E and I. Shear deformation, large-deflection effects, yielding, local stress concentrations and dynamic response are not included.",

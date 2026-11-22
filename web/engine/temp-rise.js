@@ -181,12 +181,12 @@ export default {
   method: {
     basis: "The pipe is split into equal segments. At each node the gas properties are evaluated, the Darcy pressure loss and wall heat transfer over the segment are calculated, and the next node's temperature is found from a steady-flow energy balance on total enthalpy (h + V²/2).",
     equations: [
-      "V = ṁ/(ρA);  Re = ρVD/μ;  Pr = c_p μ/λ",
-      "f = 64/Re (Re < 2,300);  otherwise Swamee–Jain f = 0.25 / [log₁₀(ε/(3.7D) + 5.74/Re^0.9)]²",
-      "Nu = 3.66 (Re < 2,300);  Nu = 0.023 Re^0.8 Pr^n (Re ≥ 10,000; n = 0.4 heating, 0.3 cooling);  linear in between;  h = Nu·λ/D",
-      "1/UA = 1/(h·2πr_i·L) + ln(r_o/r_i)/(2πk_pipe·L) + ln((r_o+t)/r_o)/(2πk_ins·L)",
-      "Q = ṁ c_p (T_s − T)(1 − e^(−UA/(ṁ c_p)));   ΔP = f (L/D) ρV²/2,  P_next = max(1,000 Pa, P − ΔP)",
-      "h(T_next, P_next) + V_next²/2 = h + Q/ṁ + V²/2,  solved with nine bounded Newton steps (|ΔT| ≤ 50 K, 250–600 K); residual < 0.1 J/kg",
+      { note: "Velocity and dimensionless groups", tex: String.raw`V = \frac{\dot m}{\rho A} \qquad \mathrm{Re} = \frac{\rho\,V\,D}{\mu} \qquad \mathrm{Pr} = \frac{c_p\,\mu}{\lambda}` },
+      { note: "Friction factor: laminar below Re 2,300, otherwise Swamee–Jain", tex: String.raw`f = \frac{64}{\mathrm{Re}} \qquad f = \frac{0.25}{\left[\log_{10}\left(\dfrac{\varepsilon}{3.7D} + \dfrac{5.74}{\mathrm{Re}^{0.9}}\right)\right]^2}` },
+      { note: "Nusselt number: 3.66 below Re 2,300; Dittus–Boelter at Re ≥ 10,000 (n = 0.4 heating, 0.3 cooling); linear in between", tex: String.raw`\mathrm{Nu} = 0.023\,\mathrm{Re}^{0.8}\,\mathrm{Pr}^{n} \qquad h = \frac{\mathrm{Nu}\,\lambda}{D}` },
+      { note: "Overall conductance of a segment", tex: String.raw`\frac{1}{UA} = \frac{1}{h\,2\pi r_i L} + \frac{\ln(r_o/r_i)}{2\pi k_{\mathrm{pipe}} L} + \frac{\ln\left((r_o+t)/r_o\right)}{2\pi k_{\mathrm{ins}} L}` },
+      { note: "Heat gain and pressure drop of a segment", tex: String.raw`Q = \dot m\,c_p\,(T_s - T)\left(1 - e^{-UA/(\dot m c_p)}\right) \qquad \Delta P = f\,\frac{L}{D}\,\frac{\rho V^2}{2} \qquad P_{\mathrm{next}} = \max(1,000\ \mathrm{Pa},\ P - \Delta P)` },
+      { note: "Energy balance, solved with nine bounded Newton steps (|ΔT| ≤ 50 K, 250–600 K) to a residual below 0.1 J/kg", tex: String.raw`h(T_{\mathrm{next}},\ P_{\mathrm{next}}) + \frac{V_{\mathrm{next}}^2}{2} = h + \frac{Q}{\dot m} + \frac{V^2}{2}` },
     ],
     assumptions: [
       "Steady, horizontal, single-phase gas. Property envelope 250–600 K and 0.01–100 bar abs; the gas screen is not a phase-equilibrium calculation.",

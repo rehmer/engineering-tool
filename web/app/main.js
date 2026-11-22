@@ -9,6 +9,7 @@ import { openFeedback } from "./feedback.js";
 import { SITE_NAME } from "./config.js";
 import { renderGuide as guideHTML } from "./guide.js";
 import { EQ_METHOD } from "../engine/fluid-equivalence.js";
+import { eqHTML } from "./math.js";
 
 const $ = (id) => document.getElementById(id);
 const view = $("view");
@@ -185,7 +186,7 @@ function renderTool(id) {
     <div id="tables" class="grid2"></div>
     <details class="theory"><summary>Theory, basis and limits</summary><div class="body">
       <p>${esc(t.method.basis)}</p>
-      ${t.method.equations.map((e) => `<div class="eq">${esc(e)}</div>`).join("")}
+      ${t.method.equations.map(eqHTML).join("")}
       <p><b>Assumptions and limits</b></p><ul>${t.method.assumptions.map((a) => `<li>${esc(a)}</li>`).join("")}</ul>
       <p><b>References</b></p><ul>${t.method.references.map((a) => `<li>${esc(a)}</li>`).join("")}</ul>
     </div></details>
@@ -231,7 +232,7 @@ function equivPanelHTML(fields) {
       </div>
       <details class="theory"><summary>Conversion logic, basis and limitations</summary><div class="body">
         <p>${esc(m.basis)}</p>
-        ${m.equations.map((e) => `<div class="eq">${esc(e)}</div>`).join("")}
+        ${m.equations.map(eqHTML).join("")}
         <p><b>Which basis to use</b></p><ul>
           <li><b>Isentropic nozzle</b>: orifices, nozzles, relief valves, regulators and valves at a fixed opening. Handles both subcritical and choked flow. The default.</li>
           <li><b>Square-root SG rule</b>: rotameters at the same float position, and restrictions at small pressure drop. This is the familiar Q₂ = Q₁·√(SG₁/SG₂).</li>
