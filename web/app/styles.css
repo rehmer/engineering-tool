@@ -97,6 +97,7 @@ main{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px
 table{border-collapse:collapse;width:100%}
 .tbl{overflow-x:auto}
 .tbl th,.tbl td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle;white-space:nowrap}
+#results td:first-child{white-space:normal;min-width:9em}
 .tbl th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
 .tbl td.r,.tbl th.r{text-align:right}
 .tbl td.num{text-align:right}
