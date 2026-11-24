@@ -1,4 +1,4 @@
-// Fixed orifice gas flow. Mirrors workbook sheet 'Fixed Orifice Calculator'.
+// Fixed orifice gas flow.
 import { props, fToK, GAS_LIST, PA_PER_PSI, LB_PER_KG } from "./properties.js";
 
 const RU = 8.314462618;
@@ -10,25 +10,25 @@ export const wuCd = (Re) => 0.61 * (1 + 1.07 * Math.exp(-0.126 * Math.sqrt(Re)) 
 
 export function orifice(i) {
   const gas = String(i.gas).toUpperCase();
-  const Pu = (i.pu + i.pamb) * PA_PER_PSI;           // E6 = E17, Pa abs
-  const Pd = i.pd * PA_PER_PSI;                      // E7
-  const T = fToK(i.t);                               // E9
-  const D = i.d * 0.0254;                            // E10
-  const A = (Math.PI / 4) * D * D;                   // E22
-  const st = props(gas, T, Pu, i.method);            // 'Property calculations' row 7
-  const k = st.valid ? st.k : NaN;                   // C33 (BI7)
-  const rho = st.valid ? st.rho : NaN;               // C35/C36 (BC7)
-  const mu = st.valid ? st.mu : NaN;                 // K14 (BG7)
-  const rhoIdeal = (Pu * st.MW) / 1000 / (RU * T);   // C34
-  const rc = Math.pow(2 / (k + 1), k / (k - 1));     // C19
-  const Pcrit = Pu * rc;                             // E20
-  const Pused = Math.max(Pd, Pcrit);                 // E21
-  const r = Pused / Pu;                              // C37
+  const Pu = (i.pu + i.pamb) * PA_PER_PSI;           // Pa abs
+  const Pd = i.pd * PA_PER_PSI;
+  const T = fToK(i.t);
+  const D = i.d * 0.0254;
+  const A = (Math.PI / 4) * D * D;
+  const st = props(gas, T, Pu, i.method);
+  const k = st.valid ? st.k : NaN;
+  const rho = st.valid ? st.rho : NaN;
+  const mu = st.valid ? st.mu : NaN;
+  const rhoIdeal = (Pu * st.MW) / 1000 / (RU * T);
+  const rc = Math.pow(2 / (k + 1), k / (k - 1));
+  const Pcrit = Pu * rc;
+  const Pused = Math.max(Pd, Pcrit);
+  const r = Pused / Pu;
   const inputsOK = i.pu >= 0 && i.pd > 0 && i.pamb > 0 && i.t > -459.67 && i.d > 0 && i.pd < i.pu + i.pamb;
-  // K15: mass flow at Cd = 1, kg/s
+  // mass flow at Cd = 1, kg/s
   const m1 = inputsOK ? A * Math.sqrt(((2 * k) / (k - 1)) * Pu * rho * Math.pow(r, 2 / k) * (1 - Math.pow(r, (k - 1) / k))) : NaN;
-  const rePerCd = (m1 * D) / (A * mu);               // K16
-  // K17: 61 explicit fixed-point iterations of Eq. 15, starting at Cd = 0.61
+  const rePerCd = (m1 * D) / (A * mu);
+  // 61 explicit fixed-point iterations of Eq. 15, starting at Cd = 0.61
   let cdPrev = NaN, cd = 0.61;
   const iters = [];
   for (let n = 0; n < 61; n++) {
@@ -36,13 +36,13 @@ export function orifice(i) {
     cdPrev = trial; cd = wuCd(Re);
     iters.push([n + 1, trial, Re, cd]);
   }
-  const relChange = Math.abs(cd - cdPrev) / Math.max(Math.abs(cd), 1e-12); // K20
-  const cdWu = relChange < 1e-6 && cd > 0 && cd <= 1 ? cd : NaN;           // K17
-  const cdUsed = i.cdMode === "Manual" ? (i.cd > 0 && i.cd <= 1 ? i.cd : NaN) : i.cdMode === "Wu gas estimate" ? cdWu : NaN; // K18
-  const check = !Number.isFinite(cdUsed) ? "CHECK INPUTS / Cd" : inputsOK ? "OK" : "CHECK INPUTS";    // C15
-  const mdot = check === "OK" ? cdUsed * m1 : NaN;   // C24 kg/s
-  const choked = Pd <= Pcrit;                        // C16
-  // Standard volume flow (not in the workbook): same density method, at the user's standard state
+  const relChange = Math.abs(cd - cdPrev) / Math.max(Math.abs(cd), 1e-12);
+  const cdWu = relChange < 1e-6 && cd > 0 && cd <= 1 ? cd : NaN;
+  const cdUsed = i.cdMode === "Manual" ? (i.cd > 0 && i.cd <= 1 ? i.cd : NaN) : i.cdMode === "Wu gas estimate" ? cdWu : NaN;
+  const check = !Number.isFinite(cdUsed) ? "CHECK INPUTS / Cd" : inputsOK ? "OK" : "CHECK INPUTS";
+  const mdot = check === "OK" ? cdUsed * m1 : NaN;   // kg/s
+  const choked = Pd <= Pcrit;
+  // Standard volume flow: same density method, at the user's standard state
   const pstd = i.pstd ?? 14.696, tstd = i.tstd ?? 60;
   const stdOK = pstd > 0 && tstd > -459.67;
   const Tstd = fToK(tstd), Pstd = pstd * PA_PER_PSI;
@@ -56,8 +56,8 @@ export function orifice(i) {
     acfm: (mdot / rho / FT3_M3) * 60,                // at upstream conditions
     check, Pu, Pd, T, D, A, st, k, rho, mu, rhoIdeal, rc, Pcrit, Pused, r, ratio: Pd / Pu, m1, rePerCd, cdWu, cdUsed, relChange, iters,
     regime: check !== "OK" || !Number.isFinite(Pcrit) ? "—" : choked ? "Choked" : "Subcritical",
-    mdot, ReFlow: (mdot * D) / (A * mu),             // K19
-    cdAtRe: i.re >= 0 ? wuCd(i.re) : NaN,            // K8
+    mdot, ReFlow: (mdot * D) / (A * mu),
+    cdAtRe: i.re >= 0 ? wuCd(i.re) : NaN,
   };
 }
 

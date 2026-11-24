@@ -1,4 +1,4 @@
-// Beam response, Roark Table 8.1 cases 1a, 1d, 1e, 2a, 2d, 2e. Mirrors workbook sheet 'Roark Beam Table 8.1'.
+// Beam response, Roark Table 8.1 cases 1a, 1d, 1e, 2a, 2d, 2e.
 
 export const CASES = {
   "1a": "Point load W at a · left free, right fixed",
@@ -21,7 +21,7 @@ const DIM_LABELS = {
 };
 export const dimLabel = (sec, n) => DIM_LABELS[sec]?.[n] || "";
 
-/** Section check, extreme-fibre distance c and I (G21:G23). */
+/** Section check, extreme-fibre distance c and I. */
 export function section(sec, d) {
   const [g16, g17, g18, g19] = d;
   let check = "OK", c, I;
@@ -45,11 +45,11 @@ export function beam(i) {
   const l = i.l, a = i.a, x = i.x, W = i.W, wa = i.wa, wl = i.wl, E = i.E, I = sec.I;
   const check = !(cs in CASES) ? "CHECK: choose 1a, 1d, 1e, 2a, 2d, or 2e" : l <= 0 ? "CHECK: l must be > 0" : a < 0 || a > l ? "CHECK: a must satisfy 0 <= a <= l"
     : x < 0 || x > l ? "CHECK: x must satisfy 0 <= x <= l" : cs[0] === "2" && a >= l ? "CHECK: distributed load requires a < l"
-    : !(E > 0 && I > 0) ? "CHECK: E and I must be > 0" : "OK";                          // C16
+    : !(E > 0 && I > 0) ? "CHECK: E and I must be > 0" : "OK";
   const out = { check, sec, caseId: cs };
   if (check !== "OK") return out;
-  const L = l - a, EI = E * I, point = cs[0] === "1", dw = wl - wa;                     // C43, C47, C46
-  const total = point ? W : ((wa + wl) / 2) * L;                                        // C48
+  const L = l - a, EI = E * I, point = cs[0] === "1", dw = wl - wa;
+  const total = point ? W : ((wa + wl) / 2) * L;
   let Ra, Rb, Ma, Mb, ta, tb, ya;
   switch (cs) {
     case "1a": Ra = 0; Rb = W; Ma = 0; Mb = -W * L; ta = (W * L ** 2) / (2 * EI); tb = 0; ya = (-W * (2 * l ** 3 - 3 * l ** 2 * a + a ** 3)) / (6 * EI); break;
@@ -64,7 +64,7 @@ export function beam(i) {
       tb = (wa * (l ** 2 - a ** 2) ** 2) / (24 * EI * l) + (dw * L ** 2 * (8 * l ** 2 + 9 * a * l + 3 * a ** 2)) / (360 * EI * l); ya = 0; break;
   }
   const yb = 0;
-  // general response at any x (C29:C32 and the profile columns)
+  // general response at any x
   const at = (xx) => {
     const m = Math.max(xx - a, 0);
     return point ? {
@@ -86,8 +86,8 @@ export function beam(i) {
   const Vmax = ext("V", (u, w) => u > w), Vmin = ext("V", (u, w) => u < w);
   const yAbs = Math.abs(ymax.value) >= Math.abs(ymin.value) ? ymax : ymin;
   const vAbs = Math.abs(Vmax.value) >= Math.abs(Vmin.value) ? Vmax : Vmin;
-  const Mabs = Math.max(Math.abs(Mmax.value), Math.abs(Mmin.value));                   // G25
-  const stress = sec.S > 0 ? Mabs / sec.S : NaN;                                         // G26
+  const Mabs = Math.max(Math.abs(Mmax.value), Math.abs(Mmin.value));
+  const stress = sec.S > 0 ? Mabs / sec.S : NaN;
   const here = at(x);
   return {
     ...out, L, EI, total, Ra, Rb, Ma, Mb, ta, tb, ya, yb, here, profile, Mmax, Mmin, ymax, ymin,

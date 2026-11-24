@@ -1,6 +1,6 @@
 // Fluid equivalence: what a standard volume flow measured or rated with one gas
 // (the tested fluid) becomes for another gas through the same device.
-// New in tool v1.1.0; there is no workbook equivalent.
+// Added in Flow Rate Converter v1.1.0.
 import { props, fToK, RU } from "./properties.js";
 
 const PA_PER_PSI = 6894.757293168;

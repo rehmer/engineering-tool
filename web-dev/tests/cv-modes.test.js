@@ -1,8 +1,8 @@
 // Cv tool 2.0: flow from Cv or Cv from flow, for gas or liquid.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import tool, { cvFlow, cvGasRequired, cvLiquid } from "../engine/cv-flow.js";
-import { defaults, normalize } from "../engine/index.js";
+import tool, { cvFlow, cvGasRequired, cvLiquid } from "../../web/engine/cv-flow.js";
+import { defaults, normalize } from "../../web/engine/index.js";
 
 const rel = (a, b) => Math.abs(a - b) / Math.abs(b);
 const base = { ...defaults(tool) };

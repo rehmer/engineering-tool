@@ -1,7 +1,7 @@
 // Engine entry point: the tool registry plus helpers shared by the web app,
 // the calc record and the tests. No browser APIs are used here, so the same
 // code runs in Node for testing and later on a server.
-import { ENGINE_VERSION, REFERENCE_WORKBOOK } from "./version.js";
+import { ENGINE_VERSION } from "./version.js";
 import flowConverter from "./flow-converter.js";
 import pipeFlow from "./pipe-flow.js";
 import tempRise from "./temp-rise.js";
@@ -11,9 +11,9 @@ import cvFlow from "./cv-flow.js";
 import beam from "./beam.js";
 import gasProperties from "./gas-properties.js";
 
-export { ENGINE_VERSION, REFERENCE_WORKBOOK };
+export { ENGINE_VERSION };
 
-/** Tools in workbook sheet order, then the property lookup. */
+/** Tools in menu order, then the property lookup. */
 export const TOOLS = [flowConverter, pipeFlow, tempRise, orifice, reliefValve, cvFlow, beam, gasProperties];
 export const toolById = (id) => TOOLS.find((t) => t.id === id);
 

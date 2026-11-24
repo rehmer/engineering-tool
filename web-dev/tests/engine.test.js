@@ -1,9 +1,9 @@
 // Behaviour tests that don't depend on the Excel fixture.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { TOOLS, run, defaults, normalize, fingerprint, ENGINE_VERSION } from "../engine/index.js";
-import { setup, solve, evaluate, flowCurve, MODELS } from "../engine/pipe-flow.js";
-import { props } from "../engine/properties.js";
+import { TOOLS, run, defaults, normalize, fingerprint, ENGINE_VERSION } from "../../web/engine/index.js";
+import { setup, solve, evaluate, flowCurve, MODELS } from "../../web/engine/pipe-flow.js";
+import { props } from "../../web/engine/properties.js";
 
 test("every tool has the fields the app and calc record rely on", () => {
   for (const t of TOOLS) {

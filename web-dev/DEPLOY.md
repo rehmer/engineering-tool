@@ -29,5 +29,5 @@ Until the endpoint is set, the Feedback button copies the report to the visitor'
 ## Notes
 
 - `web/_headers` sets security headers, including a Content-Security-Policy that allows posts only to this site and formspree.io.
-- `tests/` and `tools/` are deployed too. They are harmless (test files and Excel reference numbers, no secrets).
+- Only `web/` is published. Tests, tools and these notes live in `web-dev/` and are not deployed.
 - To restrict the site to invited people later, add Cloudflare Access to the Pages project (Settings → General → Access policy) with an email allow list.

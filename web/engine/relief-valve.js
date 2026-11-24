@@ -1,32 +1,32 @@
-// Relief valve gas capacity (API 520). Mirrors workbook sheet 'Relief Valve Calculator'.
+// Relief valve gas capacity (API 520).
 import { props, fToK, GAS_LIST, LB_PER_KG } from "./properties.js";
 
 const KPA_PER_PSI = 6.894757293168;
-/** API 526 effective orifice areas, in² (H5:I18). */
+/** API 526 effective orifice areas, in². */
 export const API_ORIFICES = { D: 0.11, E: 0.196, F: 0.307, G: 0.503, H: 0.785, J: 1.287, K: 1.838, L: 2.853, M: 3.6, N: 4.34, P: 6.38, Q: 11.05, R: 16, T: 26 };
 export const ORIFICE_OPTIONS = ["Custom", ...Object.keys(API_ORIFICES)];
 export const Z_METHODS = ["Manual", "Ideal Gas", "Peng-Robinson"];
 
 export function relief(i) {
   const gas = String(i.gas).toUpperCase();
-  const P1 = (i.pset + i.pamb) * KPA_PER_PSI;        // E6 kPa abs
-  const P2 = i.pback * KPA_PER_PSI;                  // E7
-  const T = fToK(i.t);                               // E9
-  const method = i.zMethod === "Manual" ? "Ideal Gas" : i.zMethod; // 'Property calculations'!E8
+  const P1 = (i.pset + i.pamb) * KPA_PER_PSI;        // kPa abs
+  const P2 = i.pback * KPA_PER_PSI;
+  const T = fToK(i.t);
+  const method = i.zMethod === "Manual" ? "Ideal Gas" : i.zMethod;
   const st = props(gas, T, P1 * 1000, method);
-  const MW = st.MW;                                  // C38
-  const k = st.valid ? st.k : NaN;                   // C39
-  const Zcalc = st.valid ? (method === "Ideal Gas" ? 1 : st.Z) : NaN; // C41 (AM8)
-  const Z = i.zMethod === "Manual" ? (i.zManual > 0 ? i.zManual : NaN) : Zcalc; // C42
-  const r = P2 / P1;                                 // C23
-  const rc = Math.pow(2 / (k + 1), k / (k - 1));     // C24
-  const areaIn2 = i.size === "Custom" ? i.area : API_ORIFICES[i.size]; // C26
-  const areaMm2 = areaIn2 * 645.16;                  // E26
+  const MW = st.MW;
+  const k = st.valid ? st.k : NaN;
+  const Zcalc = st.valid ? (method === "Ideal Gas" ? 1 : st.Z) : NaN;
+  const Z = i.zMethod === "Manual" ? (i.zManual > 0 ? i.zManual : NaN) : Zcalc;
+  const r = P2 / P1;
+  const rc = Math.pow(2 / (k + 1), k / (k - 1));
+  const areaIn2 = i.size === "Custom" ? i.area : API_ORIFICES[i.size];
+  const areaMm2 = areaIn2 * 645.16;
   const inputsOK = !(i.pset < 0 || i.pback <= 0 || i.pamb <= 0 || i.t <= -459.67 || i.kd <= 0 || i.kd > 1 || i.kb <= 0 || i.kb > 1 ||
     i.kc <= 0 || i.kc > 1 || (i.size === "Custom" && i.area <= 0) || (i.zMethod === "Manual" && i.zManual <= 0) || i.pback >= i.pset + i.pamb);
-  const sonic = r <= rc;                             // C20
-  const C = 0.03948 * Math.sqrt(k * Math.pow(2 / (k + 1), (k + 1) / (k - 1))); // C27
-  const F2 = Math.sqrt((k / (k - 1)) * Math.pow(r, 2 / k) * ((1 - Math.pow(r, (k - 1) / k)) / (1 - r))); // C28
+  const sonic = r <= rc;
+  const C = 0.03948 * Math.sqrt(k * Math.pow(2 / (k + 1), (k + 1) / (k - 1)));
+  const F2 = Math.sqrt((k / (k - 1)) * Math.pow(r, 2 / k) * ((1 - Math.pow(r, (k - 1) / k)) / (1 - r)));
   const W = !inputsOK ? NaN : sonic
     ? areaMm2 * C * i.kd * i.kb * i.kc * P1 * Math.sqrt(MW / (T * Z))                       // Eq. 3.6
     : (areaMm2 * F2 * i.kd * i.kc / 17.9) * Math.sqrt((MW * P1 * (P1 - P2)) / (T * Z));      // Eq. 3.8

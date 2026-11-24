@@ -1,8 +1,8 @@
 // Selectable input units: conversions to each tool's base (US) unit and back.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { TOOLS } from "../engine/index.js";
-import { dimOf, unitsOf, toBase, fromBase, unitsFor } from "../app/units.js";
+import { TOOLS } from "../../web/engine/index.js";
+import { dimOf, unitsOf, toBase, fromBase, unitsFor } from "../../web/app/units.js";
 
 const f = (unit) => ({ type: "number", unit });
 const close = (a, b, tol = 1e-9) => assert.ok(Math.abs(a - b) <= tol * Math.max(1, Math.abs(b)), `${a} vs ${b}`);

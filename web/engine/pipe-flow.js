@@ -1,16 +1,14 @@
-// Polytropic gas pipe flow. Mirrors workbook sheet 'polytropic pipe flow'.
-// The workbook asks the user to Goal Seek C37 = 0 by changing C9; solve() does that directly.
-// Cell references in comments point at that sheet.
+// Polytropic gas pipe flow. solve() finds the mass flow that makes the momentum residual zero.
 import { GAS, GAS_NAMES, props, fToK } from "./properties.js";
 
-export const PSI = 6894.757293168; // Pa per psi (E7:E8)
-const G = 9.81;                    // C56
-const R_SHEET = 8.314;             // C45
+export const PSI = 6894.757293168; // Pa per psi
+const G = 9.81;
+const R_GAS = 8.314;
 
 export const MODELS = ["Polytropic (Eq. 25)", "Isothermal", "Isentropic"];
 export const MATERIALS = ["Rigid PVC/HDPE", "Glass-reinforced plastic", "Commercial Steel", "Spiral Weld Steel"];
 
-// Equivalent length Le/D per material (sheet M7:Q14)
+// Equivalent length Le/D per material
 export const FITTINGS = [
   ["45° threaded elbow, r/D=1", [20, 18, 16, 14]],
   ["90° threaded elbow, r/D=1", [37, 34, 30, 26]],
@@ -21,15 +19,15 @@ export const FITTINGS = [
   ["Threaded tee, branch", [75, 68, 60, 53]],
   ["Threaded tee, straight run", [25, 23, 20, 18]],
 ];
-export const K_ENTRANCE = 0.5; // D80
-export const K_EXIT = 1;       // D81
+export const K_ENTRANCE = 0.5;
+export const K_EXIT = 1;
 // qty array layout: FITTINGS.length fitting counts, then entrance count, then exit count
 export const QTY_LENGTH = FITTINGS.length + 2;
 
 export const THERMAL = ["Unknown / in between", "Insulated, short or fast line (NTU ≲ 0.3)", "Long, bare or buried line (NTU ≳ 3)"];
 export const PURPOSE = ["Best estimate", "Guaranteed minimum flow or maximum ΔP", "Credible maximum flow"];
 
-/** Legacy viscosity correlation (C44), shown for comparison only. */
+/** Simple viscosity correlation, shown for comparison only. */
 function legacyViscosity(fluid, T) {
   switch (fluid) {
     case "AIR": return 0.00001716 * Math.pow(T / 273.15, 1.5) * 383.55 / (T + 110.4);
@@ -44,18 +42,18 @@ function legacyViscosity(fluid, T) {
 /** State that does not depend on mass flow. */
 export function setup(i) {
   const fluid = String(i.fluid).toUpperCase();
-  const P1 = (i.pin + i.atm) * PSI;  // E7
-  const P2 = (i.pout + i.atm) * PSI; // E8
-  const T = fToK(i.t);               // E10
+  const P1 = (i.pin + i.atm) * PSI;
+  const P2 = (i.pout + i.atm) * PSI;
+  const T = fToK(i.t);
   const pr = props(fluid, T, P1, i.method);
   const ideal = props(fluid, T, P1, "Ideal Gas");
   const MW = GAS[fluid][0];
   const matIx = Math.max(0, MATERIALS.indexOf(i.mat));
   return {
     fluid, P1, P2, T, pr, ideal, MW, matIx,
-    rhoIdealSheet: (MW * P1) / (1000 * R_SHEET * T), // C43
-    muLegacy: legacyViscosity(fluid, T),           // C44
-    rho0: (101325 * MW) / (1000 * R_SHEET * 273.15), // C61, density at 1 atm and 0 °C
+    rhoIdealSimple: (MW * P1) / (1000 * R_GAS * T),
+    muLegacy: legacyViscosity(fluid, T),
+    rho0: (101325 * MW) / (1000 * R_GAS * 273.15), // density at 1 atm and 0 °C
   };
 }
 
@@ -63,34 +61,34 @@ export function setup(i) {
 export function evaluate(i, S, mdot, P2override, modelOverride) {
   const P2 = P2override ?? S.P2;
   const model = modelOverride ?? i.model;
-  const rho = S.pr.rho, mu = S.pr.mu, k = S.pr.k;               // C51, C52, C49
-  const V = (0.2486 * mdot) / (rho * i.id * i.id);              // C50
-  const Re = (rho * V * i.id * 0.0254) / mu;                    // C46
-  const fLam = 64 / Re;                                         // C47
-  const fTurb = 0.25 / Math.pow(Math.log10(i.eps / (3.7 * i.id) + 5.74 / Math.pow(Re, 0.9)), 2); // C48
-  const f = Re < 2300 ? fLam : fTurb;                           // C57
-  const Kpipe = (f * (i.len * 12)) / i.id;                      // H71
-  const Kfit = FITTINGS.map((ft, j) => (i.qty[j] || 0) * ft[1][S.matIx] * f); // H72:H79
-  const Kent = (i.qty[FITTINGS.length] || 0) * K_ENTRANCE;      // H80
-  const Kexit = (i.qty[FITTINGS.length + 1] || 0) * K_EXIT;     // H81
-  const K = Kpipe + Kfit.reduce((a, b) => a + b, 0) + Kent + Kexit; // H82
-  const hL = (K * V * V) / (2 * G);                             // F82
-  const x = (S.P1 - P2) / S.P1;                                 // C60
-  const xch = K > 0 ? Math.exp(-Math.exp(0.43 - 0.6 * k - 0.43 * Math.log(K))) : 0; // C62
-  const xu = xch > 0 ? Math.min(Math.max(x, 0), xch) : Math.max(x, 0); // C63
-  const cEq25 = 1 + 1.8 * xu * ((k - 1) / (K + 1));             // C58
-  const c = model === "Isothermal" ? 1 : model === "Isentropic" ? k : cEq25; // C15
+  const rho = S.pr.rho, mu = S.pr.mu, k = S.pr.k;
+  const V = (0.2486 * mdot) / (rho * i.id * i.id);
+  const Re = (rho * V * i.id * 0.0254) / mu;
+  const fLam = 64 / Re;
+  const fTurb = 0.25 / Math.pow(Math.log10(i.eps / (3.7 * i.id) + 5.74 / Math.pow(Re, 0.9)), 2);
+  const f = Re < 2300 ? fLam : fTurb;
+  const Kpipe = (f * (i.len * 12)) / i.id;
+  const Kfit = FITTINGS.map((ft, j) => (i.qty[j] || 0) * ft[1][S.matIx] * f);
+  const Kent = (i.qty[FITTINGS.length] || 0) * K_ENTRANCE;
+  const Kexit = (i.qty[FITTINGS.length + 1] || 0) * K_EXIT;
+  const K = Kpipe + Kfit.reduce((a, b) => a + b, 0) + Kent + Kexit;
+  const hL = (K * V * V) / (2 * G);
+  const x = (S.P1 - P2) / S.P1;
+  const xch = K > 0 ? Math.exp(-Math.exp(0.43 - 0.6 * k - 0.43 * Math.log(K))) : 0;
+  const xu = xch > 0 ? Math.min(Math.max(x, 0), xch) : Math.max(x, 0);
+  const cEq25 = 1 + 1.8 * xu * ((k - 1) / (K + 1));
+  const c = model === "Isothermal" ? 1 : model === "Isentropic" ? k : cEq25;
   const Y = xu <= 0 || K <= 0 ? 1
-    : Math.sqrt((c / ((c + 1) * xu)) * ((Math.pow(1 - xu, (c + 1) / c) - 1) / ((2 / (c * K)) * Math.log(1 - xu) - 1))); // C59
-  const avail = S.P1 * xu - i.elev * 0.3048 * rho * G;          // C35
-  const loss = (rho * G * hL) / (Y * Y);                        // C36
+    : Math.sqrt((c / ((c + 1) * xu)) * ((Math.pow(1 - xu, (c + 1) / c) - 1) / ((2 / (c * K)) * Math.log(1 - xu) - 1)));
+  const avail = S.P1 * xu - i.elev * 0.3048 * rho * G;
+  const loss = (rho * G * hL) / (Y * Y);
   return {
     mdot, V, Re, fLam, fTurb, f, Kpipe, Kfit, Kent, Kexit, K, hL, x, xch, xu, cEq25, c, Y,
-    avail, loss, resid: avail - loss,                           // C37
-    mach: V / S.pr.sound,                                       // C54
-    choked: x > xch,                                            // C64
-    P2choked: (S.P1 * (1 - xch)) / PSI - i.atm,                 // C31 psig
-    P2used: (S.P1 * (1 - xu)) / PSI - i.atm,                    // C65 psig
+    avail, loss, resid: avail - loss,
+    mach: V / S.pr.sound,
+    choked: x > xch,
+    P2choked: (S.P1 * (1 - xch)) / PSI - i.atm,                 // psig
+    P2used: (S.P1 * (1 - xu)) / PSI - i.atm,                    // psig
   };
 }
 
@@ -216,10 +214,10 @@ export default {
     else if (r.choked) status = { level: "bad", text: "CHOKED: using choked pressure drop", detail: "Flow is at its maximum for this inlet pressure" };
     else status = { level: "ok", text: "SUBSONIC: using actual pressure drop", detail: rangeNote(r, S) };
 
-    const acfm = r.mdot / (S.pr.rho * 0.062428) / 60;           // C28
-    const scfm = (acfm * S.pr.rho) / S.rho0;                     // C27, at 0 °C and 1 atm
-    const lbmin = r.mdot / 60, kghr = lbmin * 27.2155;           // C24, C25
-    // Outlet state along Pv^c = const (the sheet reports inlet Mach only)
+    const acfm = r.mdot / (S.pr.rho * 0.062428) / 60;
+    const scfm = (acfm * S.pr.rho) / S.rho0;                     // at 0 °C and 1 atm
+    const lbmin = r.mdot / 60, kghr = lbmin * 27.2155;
+    // Outlet state along Pv^c = const
     const pr2 = 1 - r.xu;
     const V2 = r.V / Math.pow(pr2, 1 / r.c);
     const mach2 = V2 / (S.pr.sound * Math.sqrt(Math.pow(pr2, (r.c - 1) / r.c)));
@@ -318,7 +316,7 @@ function propTable(v, S) {
     columns: ["Property", "Ideal gas / simple correlation", "Selected method", "Difference"],
     rows: [
       ["Molecular weight (g/mol)", S.MW, "", ""],
-      ["Density (kg/m³)", S.rhoIdealSheet, S.pr.valid ? S.pr.rho : NaN, { pct: pct(S.rhoIdealSheet, S.pr.rho) }],
+      ["Density (kg/m³)", S.rhoIdealSimple, S.pr.valid ? S.pr.rho : NaN, { pct: pct(S.rhoIdealSimple, S.pr.rho) }],
       ["Viscosity (Pa·s)", S.muLegacy, S.pr.valid ? S.pr.mu : NaN, { pct: pct(S.muLegacy, S.pr.mu) }],
       ["Heat-capacity ratio k = Cp/Cv", S.ideal.k, S.pr.valid ? S.pr.k : NaN, { pct: pct(S.ideal.k, S.pr.k) }],
       ["Speed of sound (m/s)", S.ideal.sound, S.pr.valid ? S.pr.sound : NaN, { pct: pct(S.ideal.sound, S.pr.sound) }],

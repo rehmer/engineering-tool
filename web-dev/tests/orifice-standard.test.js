@@ -1,7 +1,7 @@
 // Standard volume flow output added to the Fixed Orifice tool in 1.1.0 (not in the workbook).
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import tool, { orifice } from "../engine/orifice.js";
+import tool, { orifice } from "../../web/engine/orifice.js";
 
 const base = { gas: "Air", method: "Ideal Gas", pu: 100, pd: 14.7, pamb: 14.7, t: 70, d: 0.25, cdMode: "Manual", cd: 0.61, re: 1000 };
 const rel = (a, b) => Math.abs(a - b) / Math.abs(b);

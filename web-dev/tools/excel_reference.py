@@ -2,7 +2,7 @@
 
 For each case this script writes the inputs into a temporary copy of the workbook,
 recalculates, reads the result cells, and saves everything to
-web/tests/fixtures/excel-reference.json. The Node tests then check the web engine
+web-dev/tests/fixtures/excel-reference.json. The Node tests then check the web engine
 against those numbers.
 
 Run from the repository root (Windows, desktop Excel, pip install pywin32):
@@ -20,7 +20,7 @@ if os.environ.get("PYWIN32_SITE"):
 import win32com.client  # noqa: E402
 
 WORKBOOK = ROOT / "workbook" / "engineering tool - no dl.xlsx"
-OUT = ROOT / "web" / "tests" / "fixtures" / "excel-reference.json"
+OUT = ROOT / "web-dev" / "tests" / "fixtures" / "excel-reference.json"
 
 
 def clean(v):

@@ -3,13 +3,13 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { convert } from "../engine/flow-converter.js";
-import { setup, evaluate, solve } from "../engine/pipe-flow.js";
-import { orifice } from "../engine/orifice.js";
-import { relief } from "../engine/relief-valve.js";
-import { cvFlow } from "../engine/cv-flow.js";
-import { tempRise } from "../engine/temp-rise.js";
-import { beam } from "../engine/beam.js";
+import { convert } from "../../web/engine/flow-converter.js";
+import { setup, evaluate, solve } from "../../web/engine/pipe-flow.js";
+import { orifice } from "../../web/engine/orifice.js";
+import { relief } from "../../web/engine/relief-valve.js";
+import { cvFlow } from "../../web/engine/cv-flow.js";
+import { tempRise } from "../../web/engine/temp-rise.js";
+import { beam } from "../../web/engine/beam.js";
 
 const ref = JSON.parse(readFileSync(new URL("./fixtures/excel-reference.json", import.meta.url), "utf8"));
 
@@ -53,7 +53,7 @@ for (const { inputs, excel } of ref.pipe) {
     const got = {
       c: e.c, P2choked: e.P2choked, V: e.V, mach: e.mach, avail: e.avail, loss: e.loss, Re: e.Re, f: e.f,
       cEq25: e.cEq25, Y: e.Y, x: e.x, xch: e.xch, xu: e.xu, P2used: e.P2used, Kpipe: e.Kpipe, K: e.K, hL: e.hL,
-      rhoIdeal: S.rhoIdealSheet, rho: S.pr.rho, muLegacy: S.muLegacy, mu: S.pr.mu, k: S.pr.k, sound: S.pr.sound,
+      rhoIdeal: S.rhoIdealSimple, rho: S.pr.rho, muLegacy: S.muLegacy, mu: S.pr.mu, k: S.pr.k, sound: S.pr.sound,
       rho0: S.rho0, acfm, scfm: (acfm * S.pr.rho) / S.rho0,
     };
     for (const [key, value] of Object.entries(got)) {
@@ -109,7 +109,7 @@ for (const { inputs, excel } of ref.tempRise || []) {
     assert.equal(r.status, excel.status, "status");
     if (!r.complete) return;
     const got = { Tout: r.Tout, Pout: r.Pout, lbhr: (r.mdot * 3600) / 0.45359237, mdot: r.mdot, heat: r.heatBtuh, hMean: r.hMean,
-      UA: r.UAworkbook, maxMach: r.maxMach, Vin: r.Vin, Vout: r.Vout, residence: r.residence };
+      UA: r.UAuncorrected, maxMach: r.maxMach, Vin: r.Vin, Vout: r.Vout, residence: r.residence };
     // the march repeats Newton steps and sums 50 segments, so allow a little more rounding than a closed form
     for (const [k, v] of Object.entries(got)) {
       const scale = k === "Pout" ? inputs.pin + inputs.patm : k === "Tout" ? 460 : undefined;

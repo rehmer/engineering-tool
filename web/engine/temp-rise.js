@@ -1,5 +1,4 @@
-// Gas temperature rise in a horizontal pipe. Mirrors workbook sheet 'Gas Temp Rise in Pipe'
-// and its node rows in 'Property calculations' (rows 12–463).
+// Gas temperature rise in a horizontal pipe, marched node by node.
 import { props, fToK, GAS_LIST, PA_PER_PSI, KG_PER_LB } from "./properties.js";
 
 const FT3_M3 = 0.028316846592;
@@ -9,7 +8,7 @@ export const FLOW_UNITS = ["SCFM", "ACFM", "lb/hr", "kg/hr"];
 const clamp = (x, lo, hi) => Math.max(lo, Math.min(hi, x));
 const kToF = (K) => ((K - 273.15) * 9) / 5 + 32;
 
-/** Node properties ('Property calculations' columns BC:BI). */
+/** Node properties. */
 function nodeProps(gas, T, P, method) {
   const s = props(gas, T, P, method);
   return { T, P, valid: s.valid, status: s.status, rho: s.rho, mu: s.mu, lambda: s.lambda, cp: s.cp, h: s.h, sound: s.sound, beta: s.beta, k: s.k };
@@ -21,14 +20,14 @@ export function tempRise(i) {
   const inputsOK = !(i.flow <= 0 || i.pin < 0 || i.patm <= 0 || i.len <= 0 || i.id <= 0 || i.od <= i.id || i.rough < 0 || i.kpipe <= 0 ||
     (i.insul === "Insulated" && (i.tins <= 0 || i.kins <= 0)) || N < 5 || N > 50 || N % 1 !== 0);
   const D = i.id * 0.0254, ri = D / 2, ro = (i.od * 0.0254) / 2;
-  const A = (Math.PI / 4) * D * D;                         // C29
-  const Lseg = (i.len * 0.3048) / N;                       // C30
+  const A = (Math.PI / 4) * D * D;
+  const Lseg = (i.len * 0.3048) / N;
   const Tb = fToK(i.tb);
   const adiabatic = i.boundary === "Adiabatic";
-  const n0 = nodeProps(gas, fToK(i.tin), (i.pin + i.patm) * PA_PER_PSI, i.method); // row 13
-  const std = props(gas, fToK(60), 101352.9322, i.method);                          // row 12
+  const n0 = nodeProps(gas, fToK(i.tin), (i.pin + i.patm) * PA_PER_PSI, i.method);
+  const std = props(gas, fToK(60), 101352.9322, i.method);
   const mdot = i.unit === "lb/hr" ? (i.flow * KG_PER_LB) / 3600 : i.unit === "kg/hr" ? i.flow / 3600
-    : i.unit === "ACFM" ? (i.flow * FT3_M3) / 60 * (n0.valid ? n0.rho : NaN) : (i.flow * FT3_M3) / 60 * (std.valid ? std.rho : NaN); // C28
+    : i.unit === "ACFM" ? (i.flow * FT3_M3) / 60 * (n0.valid ? n0.rho : NaN) : (i.flow * FT3_M3) / 60 * (std.valid ? std.rho : NaN);
   if (!inputsOK) return { inputsOK, status: "CHECK INPUTS", nodes: [], mdot, n0, std, A, N };
 
   // segment UA: inside film + pipe wall + optional insulation (Z column)
@@ -68,8 +67,8 @@ export function tempRise(i) {
     }
     n.Vnext = mdot / (s.rho * A);                                    // AG
     n.res = Lseg / ((n.V + n.Vnext) / 2);                            // AH
-    // Like the workbook: a node that does not converge leaves the next node without a state, which the
-    // sheet reports as CHECK GAS RANGE; non-convergence at the outlet node itself is reported directly.
+    // A node that does not converge leaves the next node without a state, reported as
+    // CHECK GAS RANGE; non-convergence at the outlet node itself is reported directly.
     if (s.valid && !(Math.abs(resid) < 0.1)) { fail = j + 1 < N ? "CHECK GAS RANGE" : "CHECK RANGE / CONVERGENCE"; n.unconverged = true; cur = { ...s, valid: false }; nodes.push({ j: j + 1, x: ((j + 1) * i.len) / N, ...s, converged: false }); break; }
     cur = s;
   }
@@ -87,10 +86,10 @@ export function tempRise(i) {
     inputsOK, status, nodes, mdot, n0, std, A, N, Lseg, complete,
     Tout: complete ? kToF(out.T) : NaN,
     Pout: complete ? out.P / PA_PER_PSI - i.patm : NaN,
-    heatBtuh: sum("Q") / W_PER_BTUH,                                  // G13
-    hMean: hPos.length ? hPos.reduce((a, b) => a + b, 0) / hPos.length / 5.678263337 : 0, // G14
-    UA: sum("UA") / W_PER_BTUH / 1.8,                                 // G15, Btu/(hr·°F)
-    UAworkbook: sum("UA") / W_PER_BTUH,
+    heatBtuh: sum("Q") / W_PER_BTUH,
+    hMean: hPos.length ? hPos.reduce((a, b) => a + b, 0) / hPos.length / 5.678263337 : 0,
+    UA: sum("UA") / W_PER_BTUH / 1.8,                                 // Btu/(hr·°F)
+    UAuncorrected: sum("UA") / W_PER_BTUH,
     maxMach: Math.max(...done.map((n) => n.mach)),
     Vin: done[0]?.V * 3.280839895,
     Vout: complete ? out.V * 3.280839895 : NaN,

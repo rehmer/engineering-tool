@@ -1,10 +1,10 @@
 // Tests for the v1.1 converter additions: volume-flow input and the fluid-equivalence calculator.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { run } from "../engine/index.js";
-import { equivalence, equivalenceReport, psi } from "../engine/fluid-equivalence.js";
-import { GAS, RU, props, fToK } from "../engine/properties.js";
-import { buildRecord } from "../app/record.js";
+import { run } from "../../web/engine/index.js";
+import { equivalence, equivalenceReport, psi } from "../../web/engine/fluid-equivalence.js";
+import { GAS, RU, props, fToK } from "../../web/engine/properties.js";
+import { buildRecord } from "../../web/app/record.js";
 
 const close = (a, b, tol = 1e-9) => assert.ok(Math.abs(a - b) <= tol * Math.max(1, Math.abs(b)), `${a} vs ${b}`);
 const base = { from: "Air", to: "Nitrogen", q: 100, unit: "SCFM", p1: 100, p2: 0, pamb: 14.7, t: 70, ps: 14.7, ts: 70, method: "Ideal Gas", basis: "Restriction, isentropic nozzle" };

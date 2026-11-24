@@ -1,6 +1,5 @@
 // Gas property engine.
-// Mirrors the workbook's 'gas properties' constants (M4:AF13) and the
-// 'Property calculations' sheet: Peng-Robinson cubic, ideal-gas Cp0 polynomial,
+// Gas constants and property model: Peng-Robinson cubic, ideal-gas Cp0 polynomial,
 // departure Cv/Cp, speed of sound, power-law viscosity and the validity screen.
 
 export const RU = 8.314462618; // J/(mol·K), property engine value
@@ -24,10 +23,10 @@ export const GAS_NAMES = Object.keys(GAS);
 export const GAS_LIST = ["Acetylene", "Air", "Ammonia", "Argon", "Butane", "Carbon Dioxide", "Helium", "Hydrogen", "Methane", "Nitrogen"];
 export const PA_PER_PSI = 6894.757293168;
 export const KG_PER_LB = 0.45359237;
-export const LB_PER_KG = 2.20462262185; // the workbook's lb/kg factor
+export const LB_PER_KG = 2.20462262185; // lb per kg
 export const MW_AIR = 28.96546;
 
-// Thermal conductivity at 300 K (W/m·K), 'gas properties'!X4:X13; scaled by (T/300)^0.8.
+// Thermal conductivity at 300 K (W/m·K); scaled by (T/300)^0.8.
 export const LAMBDA300 = {
   "AIR": 0.026384465709828872, "NITROGEN": 0.02596867789066934, "ARGON": 0.0178374168116132,
   "HELIUM": 0.1559743213913112, "HYDROGEN": 0.18669902522580262, "ACETYLENE": 0.0214,

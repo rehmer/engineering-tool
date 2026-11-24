@@ -22,7 +22,7 @@ The site is open to everyone. Each page has a **Feedback** button (set the form 
 Requires Node 18 or later. Nothing to install.
 
 ```
-cd web
+cd web-dev
 npm run serve
 ```
 
@@ -31,7 +31,7 @@ Open http://localhost:8787. Projects and cases are saved in that browser. Use **
 ## Test it
 
 ```
-cd web
+cd web-dev
 npm test
 ```
 
@@ -55,7 +55,7 @@ There are 391 tests:
 To regenerate the Excel cases after the workbook changes, run this on Windows with desktop Excel and `pip install pywin32`:
 
 ```
-python web/tools/excel_reference.py
+python web-dev/tools/excel_reference.py
 ```
 
 The script works on a temporary copy, so the workbook is never modified. To add cases, edit the lists in that script.
@@ -78,15 +78,19 @@ web/
     fluid-equivalence.js  standard flow equivalence between gases (converter panel)
     pipe-flow.js        tool: 'polytropic pipe flow' sheet, solver and model selection guide
     index.js            tool registry, input normalisation, case fingerprint
-    version.js          engine version printed on every calc record
+    version.js          engine version, used in case fingerprints
+web-dev/                developer files, kept out of the published site
   tests/                Node tests and the Excel fixture
   tools/                local server and the Excel case generator
+  README.md, CHANGELOG.md, DEPLOY.md, package.json
 ```
+
+Cloudflare Pages publishes only `web/`, so nothing in `web-dev/` is served on the site. Keep spreadsheet cell references and other development notes out of comments in `web/`, since those files are public.
 
 ## Adding a tool (Phase 2)
 
 1. Create `engine/<tool>.js`. It exports a tool object with:
-   - `id`, `title`, `short`, `version`, `sheet` and `summary`
+   - `id`, `title`, `short`, `version` and `summary`
    - `groups` and `fields`, which build the input form automatically
    - `calculate(inputs)`, which returns `status`, `headline`, `results`, `tables`, `checks` and `raw`
    - `method`, which holds the basis, equations, assumptions and references

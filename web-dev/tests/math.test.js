@@ -1,9 +1,9 @@
 // Method equations are written in LaTeX and rendered as MathML (screen, print and Word paste).
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { TOOLS } from "../engine/index.js";
-import { EQ_METHOD } from "../engine/fluid-equivalence.js";
-import { parseTex, texToMathML } from "../app/math.js";
+import { TOOLS } from "../../web/engine/index.js";
+import { EQ_METHOD } from "../../web/engine/fluid-equivalence.js";
+import { parseTex, texToMathML } from "../../web/app/math.js";
 
 const methods = [...TOOLS.map((t) => [t.id, t.method]), ["fluid-equivalence", EQ_METHOD]];
 

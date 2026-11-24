@@ -1,5 +1,4 @@
-// Gas property lookup. Exposes the shared property engine ('gas properties' and
-// 'Property calculations' sheets) as its own page.
+// Gas property lookup: the shared property model as its own page.
 import { props, fToK, GAS, GAS_LIST, LAMBDA300, PA_PER_PSI, MW_AIR } from "./properties.js";
 
 export default {

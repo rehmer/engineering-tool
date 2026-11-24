@@ -1,10 +1,9 @@
-// Gas flow rate converter. Mirrors workbook sheet 'Flow rate converter'.
-// Cell references in comments point at that sheet.
+// Gas flow rate converter: mass, standard and actual volume flow.
 import { GAS, props, psatWater, fToK } from "./properties.js";
 import { EQ_GASES, EQ_BASES, STD_UNITS, EQ_METHOD, equivalenceReport } from "./fluid-equivalence.js";
 
-const R_SHEET = 8.314;           // the sheet's own gas constant (C30, C34)
-const PA_PER_PSI_SHEET = 6895;   // the sheet's psi→Pa factor (E6:E13)
+const R_GAS = 8.314;             // gas constant used for the ideal and humid-air densities
+const PA_PER_PSI_ROUND = 6895;   // psi→Pa factor used for this tool's pressures
 const LB_TO_KG = 0.45359237;
 const KGM3_TO_LBFT3 = 0.062428;
 
@@ -15,35 +14,35 @@ export const MASS_UNITS = {
 
 export const FLUIDS = ["Acetylene", "Air", "Ammonia", "Argon", "Butane", "Carbon Dioxide", "Helium", "Hydrogen", "Methane", "Nitrogen", "Water"];
 
-/** Core calculation with the workbook's input set (rh and rhs as fractions, as stored in C15/F15). */
+/** Core calculation (rh and rhs as fractions). */
 export function convert(i) {
   const fluid = String(i.fluid).toUpperCase();
   const water = fluid === "WATER", air = fluid === "AIR";
   const eng = water ? "AIR" : fluid;
-  const Ptot = i.pg + i.pamb;                     // C12 psia
-  const E12 = PA_PER_PSI_SHEET * Ptot;            // Pa abs
-  const E13 = PA_PER_PSI_SHEET * i.ps;            // reference Pa abs
-  const E8 = fToK(i.t), E14 = fToK(i.ts);
+  const Ptot = i.pg + i.pamb;                     // psia
+  const Pact = PA_PER_PSI_ROUND * Ptot;            // Pa abs
+  const Pref = PA_PER_PSI_ROUND * i.ps;            // reference Pa abs
+  const Tact = fToK(i.t), Tref = fToK(i.ts);
   const MW = water ? 18.015268 : GAS[eng][0];
-  const pvA = air ? Math.min(E12 * 0.999999, Math.max(0, i.rh) * psatWater(((i.t - 32) * 5) / 9)) : 0;
-  const pvS = air ? Math.min(E13 * 0.999999, Math.max(0, i.rhs) * psatWater(((i.ts - 32) * 5) / 9)) : 0;
-  const act = props(eng, E8, E12, i.method);
-  const ref = props(eng, E14, E13, i.method);
-  const humid = (P, pv, T) => ((P - pv) * 0.02896546 + pv * 0.01801528) / (R_SHEET * T);
-  const C30 = water ? 999.8 : air ? humid(E12, pvA, E8) : (MW * E12) / (1000 * R_SHEET * E8);
-  const E30 = air ? C30 : water ? 999.8 : act.valid ? act.rho : NaN;
-  const C32 = water ? 999.8 : air ? C30 : i.method === "Ideal Gas" ? (act.valid ? C30 : NaN) : E30;
-  const C34 = water ? NaN : ref.valid ? (air ? humid(E13, pvS, E14) : (MW * E13) / (1000 * R_SHEET * E14)) : NaN;
-  const C33 = air ? C34 : water ? NaN : ref.valid ? ref.rho : NaN;
-  const rhoRef = i.method === "Ideal Gas" ? C34 : C33;
+  const pvA = air ? Math.min(Pact * 0.999999, Math.max(0, i.rh) * psatWater(((i.t - 32) * 5) / 9)) : 0;
+  const pvS = air ? Math.min(Pref * 0.999999, Math.max(0, i.rhs) * psatWater(((i.ts - 32) * 5) / 9)) : 0;
+  const act = props(eng, Tact, Pact, i.method);
+  const ref = props(eng, Tref, Pref, i.method);
+  const humid = (P, pv, T) => ((P - pv) * 0.02896546 + pv * 0.01801528) / (R_GAS * T);
+  const rhoIdeal = water ? 999.8 : air ? humid(Pact, pvA, Tact) : (MW * Pact) / (1000 * R_GAS * Tact);
+  const rhoSel = air ? rhoIdeal : water ? 999.8 : act.valid ? act.rho : NaN;
+  const rhoUsed = water ? 999.8 : air ? rhoIdeal : i.method === "Ideal Gas" ? (act.valid ? rhoIdeal : NaN) : rhoSel;
+  const rhoRefIdeal = water ? NaN : ref.valid ? (air ? humid(Pref, pvS, Tref) : (MW * Pref) / (1000 * R_GAS * Tref)) : NaN;
+  const rhoRefSel = air ? rhoRefIdeal : water ? NaN : ref.valid ? ref.rho : NaN;
+  const rhoRef = i.method === "Ideal Gas" ? rhoRefIdeal : rhoRefSel;
   const m = i.mlbhr;
   return {
-    water, air, MW, Tact: E8, Pact: E12, Tref: E14, Pref: E13, pvA, pvS, act, ref,
-    rhoIdeal: C30, rhoSel: E30, rhoUsed: C32, rhoRefIdeal: C34, rhoRefSel: C33, rhoRef,
+    water, air, MW, Tact, Pact, Tref, Pref, pvA, pvS, act, ref,
+    rhoIdeal, rhoSel, rhoUsed, rhoRefIdeal, rhoRefSel, rhoRef,
     mass: { lbs: m / 3600, lbmin: m / 60, lbhr: m, kgs: (m * LB_TO_KG) / 3600, kgmin: (m * LB_TO_KG) / 60, kghr: m * LB_TO_KG },
-    nm3: water ? NaN : (m * LB_TO_KG) / rhoRef,                 // C23
-    scfm: water ? NaN : m / (rhoRef * KGM3_TO_LBFT3) / 60,      // C24
-    acfm: m / (C32 * KGM3_TO_LBFT3) / 60,                       // C25
+    nm3: water ? NaN : (m * LB_TO_KG) / rhoRef,
+    scfm: water ? NaN : m / (rhoRef * KGM3_TO_LBFT3) / 60,
+    acfm: m / (rhoUsed * KGM3_TO_LBFT3) / 60,
   };
 }
 

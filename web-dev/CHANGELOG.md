@@ -1,5 +1,9 @@
 # Changelog
 
+## Site layout (2026-11-23)
+
+- The published folder `web/` now holds only the site. Tests, tools, notes and `package.json` moved to `web-dev/`, and code comments in `web/` no longer carry spreadsheet cell references. No result changes.
+
 ## Engine 0.4.0 (2026-11-23)
 
 - Input units: a US / SI switch in the top bar sets every input, and each input has its own unit list (pressure gauge and absolute, stress, temperature, length, area, force, line load, conductivity). The tools still calculate in their US base units, so results are unchanged. Saved cases keep their units.
