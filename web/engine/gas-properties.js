@@ -7,8 +7,7 @@ export default {
   title: "Gas Property Lookup",
   short: "Gas Properties",
   version: "1.0.0",
-  sheet: "gas properties / Property calculations",
-  summary: "Density, compressibility, heat capacities, k, speed of sound, viscosity, conductivity and enthalpy for the ten workbook gases, by ideal gas or Peng-Robinson.",
+  summary: "Density, compressibility, heat capacities, k, speed of sound, viscosity, conductivity and enthalpy for ten common gases, by ideal gas or Peng-Robinson.",
   groups: [{ id: "state", label: "" }],
   fields: [
     { key: "gas", label: "Gas", type: "select", options: GAS_LIST, default: "Nitrogen", group: "state" },
@@ -69,7 +68,7 @@ export default {
   },
 
   method: {
-    basis: "Peng-Robinson cubic equation of state with ideal-gas heat capacity polynomials fitted to CoolProp over 250–600 K. Ideal gas sets Z = 1 and uses the ideal heat capacities. The same engine supplies every gas tool on this site.",
+    basis: "Peng-Robinson cubic equation of state with ideal-gas heat capacity polynomials fitted to CoolProp over 250–600 K. Ideal gas sets Z = 1 and uses the ideal heat capacities. The same property model supplies every gas tool on this site.",
     equations: [
       { note: "Peng-Robinson equation of state", tex: String.raw`P = \frac{R\,T}{v-b} - \frac{a(T)}{v^2 + 2bv - b^2}` },
       { tex: String.raw`a = 0.45724\,\frac{R^2\,T_c^2}{P_c}\left[1 + m\left(1-\sqrt{T/T_c}\right)\right]^2 \qquad b = 0.0778\,\frac{R\,T_c}{P_c}` },

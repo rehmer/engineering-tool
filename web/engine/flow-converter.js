@@ -73,7 +73,6 @@ export default {
   title: "Gas Flow Rate Converter",
   short: "Flow Rate Converter",
   version: "1.1.0",
-  sheet: "Flow rate converter",
   summary: "Convert between mass, actual volume and standard volume flow. Uses ideal-gas or Peng-Robinson density, with humidity correction for air. Includes a fluid-equivalence calculator for standard flow tested with one gas.",
   groups: [
     { id: "fluid", label: "" },
@@ -141,7 +140,7 @@ export default {
         const dz = Math.abs(1 - r.act.Z);
         checks.push({ level: dz < 0.05 ? "ok" : "warn", label: "Compressibility at actual state", detail: `Z = ${r.act.Z.toFixed(5)} (Peng-Robinson)${dz >= 0.05 && v.method === "Ideal Gas" ? "; ideal gas is more than 5 % off, consider Peng-Robinson" : ""}` });
       } else {
-        checks.push({ level: "ok", label: "Air treated as ideal humid mixture", detail: "Density method selector does not apply to air (workbook behaviour)" });
+        checks.push({ level: "ok", label: "Air treated as ideal humid mixture", detail: "The density method selector does not apply to air" });
       }
     }
     if (v.pg + v.pamb <= 0) checks.push({ level: "bad", label: "Absolute pressure must be positive", detail: "" });

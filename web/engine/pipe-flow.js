@@ -172,7 +172,6 @@ export default {
   title: "Polytropic Gas Pipe Flow",
   short: "Polytropic Pipe Flow",
   version: "1.0.0",
-  sheet: "polytropic pipe flow",
   summary: "Find the gas flow a pipe run will pass for a given inlet and outlet pressure. Includes friction, fittings, elevation, polytropic expansion and a choked-flow check.",
   groups: [
     { id: "fluid", label: "" },
@@ -298,8 +297,8 @@ export default {
       "If x exceeds x_ch the choked ratio is used and the result is the maximum flow for this inlet pressure.",
     ],
     references: [
-      "Polytropic approximation of compressible flow in pipes with friction (references/ folder of this repository).",
-      "Pressure drop in pipe fittings and valves: equivalent length and resistance coefficient (references/ folder).",
+      "Kirkland, W. M. (2019), A Polytropic Approximation of Compressible Flow in Pipes With Friction, J. Fluids Eng. 141(12), 121404.",
+      "Wilson, H. (2012), Pressure Drop in Pipe Fittings and Valves: Equivalent Length and Resistance Coefficient, Katmar Software.",
       "Swamee, P. K. and Jain, A. K. (1976), Explicit equations for pipe-flow problems, J. Hydraul. Div. ASCE 102(5).",
       "Peng, D.-Y. and Robinson, D. B. (1976), Ind. Eng. Chem. Fundam. 15(1).",
     ],
@@ -316,7 +315,7 @@ function rangeNote(r, S) {
 function propTable(v, S) {
   return {
     title: "Fluid properties at inlet",
-    columns: ["Property", "Ideal / legacy", "Selected method", "Difference"],
+    columns: ["Property", "Ideal gas / simple correlation", "Selected method", "Difference"],
     rows: [
       ["Molecular weight (g/mol)", S.MW, "", ""],
       ["Density (kg/m³)", S.rhoIdealSheet, S.pr.valid ? S.pr.rho : NaN, { pct: pct(S.rhoIdealSheet, S.pr.rho) }],

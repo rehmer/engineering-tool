@@ -112,7 +112,6 @@ export default {
   title: "Beam Response (Roark Table 8.1)",
   short: "Roark Beam",
   version: "1.0.0",
-  sheet: "Roark Beam Table 8.1",
   summary: "Reactions, end actions, shear, moment, slope and deflection for six Roark Table 8.1 beam cases, with section properties and a bending stress check.",
   chart: "beam",
   groups: [

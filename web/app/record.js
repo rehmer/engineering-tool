@@ -1,16 +1,18 @@
 // Calc record: one structured record per case, rendered three ways —
 // HTML for screen and print (Save as PDF), rich HTML on the clipboard for pasting into Word,
-// and CSV for Excel. Styles are inline so the pasted version keeps its formatting.
+// and CSV for spreadsheets. Styles are inline so the pasted version keeps its formatting.
 import { ENGINE_VERSION, fingerprint } from "../engine/index.js";
 import { FITTINGS } from "../engine/pipe-flow.js";
 import { fmt, cell, resultValue, esc, today } from "./format.js";
 import { SITE_NAME } from "./config.js";
 import { texToMathML, eqEntry } from "./math.js";
+import { dimOf, displayValue } from "./units.js";
+import { refHTML } from "./refs.js";
 
 const LEVEL = { ok: "OK", warn: "CHECK", bad: "FAIL" };
 
 /** Input rows for the record, skipping fields that don't apply. */
-export function inputRows(tool, v) {
+export function inputRows(tool, v, units = {}) {
   const rows = [];
   for (const f of tool.fields) {
     if (f.type === "unit") continue;
@@ -25,21 +27,22 @@ export function inputRows(tool, v) {
       continue;
     }
     const label = f.recLabel || (typeof f.label === "function" ? f.label(v) : f.label);
-    rows.push([label, String(v[f.key]), f.unitKey ? v[f.unitKey] : f.unit || ""]);
+    const u = dimOf(f) && units[f.key];
+    rows.push([label, u ? displayValue(f, u, v[f.key]) : String(v[f.key]), f.unitKey ? v[f.unitKey] : u || f.unit || ""]);
   }
   return rows;
 }
 
-export function buildRecord(tool, inputs, result, meta) {
+export function buildRecord(tool, inputs, result, meta, units = {}) {
   const fp = fingerprint(tool, inputs);
   return {
-    tool: { id: tool.id, title: tool.title, version: tool.version, sheet: tool.sheet },
+    tool: { id: tool.id, title: tool.title, version: tool.version },
     engine: ENGINE_VERSION,
     fingerprint: fp,
     recordId: `${tool.id.toUpperCase().slice(0, 4)}-${fp.slice(0, 8).toUpperCase()}`,
     meta: { project: "", number: "", client: "", caseName: "", date: today(), preparedBy: "", checkedBy: "", purpose: "", ...meta },
     status: result.status,
-    inputs: inputRows(tool, inputs),
+    inputs: inputRows(tool, inputs, units),
     results: [...(result.ok ? result.results : []), ...(result.extraResults || [])].map((r) => [r.label, resultValue(r), r.unit]),
     checks: [...result.checks, ...(result.extraChecks || [])].map((c) => [c.label, LEVEL[c.level] || c.level, c.detail]),
     advice: result.advice ? { recommended: result.advice.recommended, why: result.advice.why, selected: inputs.model } : null,
@@ -89,8 +92,8 @@ ${sec("Method and basis")}<p style="${P}">${esc(rec.method.basis)}</p>
 ${rec.method.equations.map(eqEntry).map(({ note, tex }) => `${note ? `<p style="${P}font-size:9pt;color:#5a6a7a;margin:6pt 0 0 12pt;page-break-after:avoid;">${esc(note)}</p>` : ""}${tex ? `<div style="margin:2pt 0 4pt 12pt;font-size:11pt;">${texToMathML(tex)}</div>` : ""}`).join("")}
 <p style="${P}margin-top:6pt;"><b>Assumptions and limits</b></p>
 <ul style="${F}font-size:10pt;margin:0 0 4pt 0;padding-left:18pt;">${rec.method.assumptions.map((a) => `<li>${esc(a)}</li>`).join("")}</ul>
-${sec("References")}<ul style="${F}font-size:10pt;margin:0;padding-left:18pt;">${rec.method.references.map((a) => `<li>${esc(a)}</li>`).join("")}</ul>
-<p style="${F}font-size:8pt;color:#5a6a7a;border-top:1px solid #9aa5b1;margin-top:12pt;padding-top:4pt;">${esc(SITE_NAME)} · ${esc(rec.tool.title)} v${esc(rec.tool.version)} · engine v${esc(rec.engine)} · fingerprint ${esc(rec.fingerprint)} · based on workbook sheet “${esc(rec.tool.sheet)}”. Results are engineering estimates and must be checked by a qualified engineer before use.</p>
+${sec("References")}<ul style="${F}font-size:10pt;margin:0;padding-left:18pt;">${rec.method.references.map((a) => `<li>${refHTML(a, "color:#1f4e78;")}</li>`).join("")}</ul>
+<p style="${F}font-size:8pt;color:#5a6a7a;border-top:1px solid #9aa5b1;margin-top:12pt;padding-top:4pt;">${esc(SITE_NAME)} · ${esc(rec.tool.title)} v${esc(rec.tool.version)} · record ${esc(rec.recordId)} · fingerprint ${esc(rec.fingerprint)}. Results are engineering estimates and must be checked by a qualified engineer before use.</p>
 </div>`;
 }
 
@@ -98,14 +101,14 @@ export function recordText(rec) {
   const lines = [`Calculation record: ${rec.tool.title}  (Record ${rec.recordId})`, `Project: ${rec.meta.project}   Case: ${rec.meta.caseName}   Date: ${rec.meta.date}`, ""];
   lines.push("INPUTS", ...rec.inputs.map((r) => `  ${r[0]}: ${r[1]} ${r[2]}`), "", "RESULTS", `  ${rec.status.text}`);
   lines.push(...rec.results.map((r) => `  ${r[0]}: ${r[1]} ${r[2]}`), "", "CHECKS", ...rec.checks.map((r) => `  [${r[1]}] ${r[0]} — ${r[2]}`));
-  lines.push("", `${rec.tool.title} v${rec.tool.version}, engine v${rec.engine}, fingerprint ${rec.fingerprint}`);
+  lines.push("", `${rec.tool.title} v${rec.tool.version}, fingerprint ${rec.fingerprint}`);
   return lines.join("\n");
 }
 
 export function recordCSV(rec) {
   const q = (s) => `"${String(s ?? "").replace(/"/g, '""')}"`;
   const rows = [["Section", "Item", "Value", "Unit / detail"],
-    ["Record", "Tool", rec.tool.title, `v${rec.tool.version}`], ["Record", "Engine", rec.engine, ""], ["Record", "Record ID", rec.recordId, rec.fingerprint],
+    ["Record", "Tool", rec.tool.title, `v${rec.tool.version}`], ["Record", "Record ID", rec.recordId, rec.fingerprint],
     ["Record", "Project", rec.meta.project, rec.meta.number], ["Record", "Case", rec.meta.caseName, ""], ["Record", "Date", rec.meta.date, ""],
     ["Record", "Prepared by", rec.meta.preparedBy, ""], ["Record", "Checked by", rec.meta.checkedBy, ""], ["Record", "Status", rec.status.text, rec.status.detail || ""],
     ...rec.inputs.map((r) => ["Input", ...r]), ...rec.results.map((r) => ["Result", ...r]), ...rec.checks.map((r) => ["Check", r[0], r[1], r[2]])];

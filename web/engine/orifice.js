@@ -68,7 +68,6 @@ export default {
   title: "Fixed Orifice Gas Flow",
   short: "Fixed Orifice",
   version: "1.1.0",
-  sheet: "Fixed Orifice Calculator",
   summary: "Mass and standard volume flow of a gas through a sharp-edged orifice, with choked or subcritical flow and a manual or Reynolds-number-based discharge coefficient.",
   groups: [
     { id: "gas", label: "" },
@@ -185,12 +184,12 @@ export default {
       "Gas phase only; properties at upstream conditions (ideal gas or Peng-Robinson). Property range 250–600 K, 1 kPa–10 MPa.",
       "Manual Cd is the default. The Wu correlation comes from hydraulic sharp-edge data and is an unvalidated estimate for compressible or choked gas flow, thick bores, rounded inlets or valves.",
       "Above the plotted range (Re > 2,500) the Wu curve tends to 0.61; that is extrapolation.",
-      "Viscosity uses the workbook's low-pressure power law.",
-      "Standard flow is the same mass flow expressed as volume at the standard pressure and temperature you enter. It is not in the workbook. \"Standard\" varies by industry and company (60 °F or 70 °F; 14.696 or 14.73 psia; normal = 0 °C), so state the basis with the number.",
+      "Viscosity uses a low-pressure power law.",
+      "Standard flow is the same mass flow expressed as volume at the standard pressure and temperature you enter. \"Standard\" varies by industry and company (60 °F or 70 °F; 14.696 or 14.73 psia; normal = 0 °C), so state the basis with the number.",
     ],
     references: [
       "Methods for the Calculation of Physical Effects (Yellow Book), CPR 14E, 3rd ed., 1997, Ch. 2 Outflow and Spray Release.",
-      "Wu, D., Burton, R. & Schoenau, G. (2002), An Empirical Discharge Coefficient Model for Orifice Flow, Int. J. Fluid Power 3(3), Eq. 15. doi.org/10.1080/14399776.2002.10781143",
+      "Wu, D., Burton, R. & Schoenau, G. (2002), An Empirical Discharge Coefficient Model for Orifice Flow, Int. J. Fluid Power 3(3), Eq. 15.",
     ],
   },
 };

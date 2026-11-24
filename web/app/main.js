@@ -10,6 +10,8 @@ import { SITE_NAME } from "./config.js";
 import { renderGuide as guideHTML } from "./guide.js";
 import { EQ_METHOD } from "../engine/fluid-equivalence.js";
 import { eqHTML } from "./math.js";
+import { refHTML } from "./refs.js";
+import { dimOf, unitsOf, toBase, displayValue, unitsFor } from "./units.js";
 
 const $ = (id) => document.getElementById(id);
 const view = $("view");
@@ -18,13 +20,24 @@ const view = $("view");
 const drafts = {};
 function draft(toolId) {
   const t = toolById(toolId);
-  return (drafts[toolId] ||= { inputs: defaults(t), caseId: null, caseName: "", dirty: false });
+  return (drafts[toolId] ||= { inputs: defaults(t), units: unitsFor(t, unitSystem()), caseId: null, caseName: "", dirty: false });
 }
 let currentTool = TOOLS[0].id;
+const unitSystem = () => (store.user.units === "SI" ? "SI" : "US");
 let last = null; // last run for the record view
 
 // ---------------------------------------------------------------- shell
-$("ver").textContent = `Free · engine v${ENGINE_VERSION}`;
+// input unit system: US or SI defaults for every tool; each field can still pick its own unit
+function paintUnitSystem() {
+  document.querySelectorAll("#usys [data-sys]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.sys === unitSystem())));
+}
+$("usys").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-sys]"); if (!b) return;
+  store.setUser({ units: b.dataset.sys });
+  for (const [id, d] of Object.entries(drafts)) d.units = unitsFor(toolById(id), unitSystem());
+  paintUnitSystem(); route();
+});
+paintUnitSystem();
 $("brand").textContent = SITE_NAME;
 
 // feedback: header and footer buttons open the same dialog with the current page's context
@@ -69,7 +82,7 @@ $("proj").addEventListener("change", (e) => { store.selectProject(e.target.value
 function openCase(id) {
   const found = store.findCase(id); if (!found) return;
   const { c } = found, t = toolById(c.toolId);
-  drafts[c.toolId] = { inputs: normalize(t, c.inputs), caseId: c.id, caseName: c.name, dirty: false };
+  drafts[c.toolId] = { inputs: normalize(t, c.inputs), units: unitsFor(t, unitSystem(), c.units), caseId: c.id, caseName: c.name, dirty: false };
   if (location.hash === `#/${c.toolId}`) route(); else location.hash = `#/${c.toolId}`;
 }
 
@@ -112,7 +125,7 @@ $("restore-file").addEventListener("change", async (e) => {
 // ---------------------------------------------------------------- tool view
 const labelOf = (f, v) => (typeof f.label === "function" ? f.label(v) : f.label);
 
-function fieldHTML(f, v) {
+function fieldHTML(f, v, units = {}) {
   const id = `f-${f.key}`;
   const label = labelOf(f, v);
   if (f.type === "select") {
@@ -120,11 +133,13 @@ function fieldHTML(f, v) {
       <div class="ctl"><select id="${id}" data-key="${f.key}">${f.options.map((o) => `<option value="${esc(o)}"${o === v[f.key] ? " selected" : ""}>${esc(f.labels?.[o] ? `${o} · ${f.labels[o]}` : o)}</option>`).join("")}</select></div>${f.hint ? `<span class="hint">${esc(f.hint)}</span>` : ""}</div>`;
   }
   if (f.type === "number") {
+    const dim = dimOf(f), shown = dim ? units[f.key] : null;
     const unit = f.unitKey
       ? `<select class="u" data-key="${f.unitKey}" aria-label="${esc(label)} unit">${f.units.map((u) => `<option${u === v[f.unitKey] ? " selected" : ""}>${esc(u)}</option>`).join("")}</select>`
+      : dim ? `<select class="u" data-ukey="${f.key}" aria-label="${esc(label)} unit">${unitsOf(f).map((u) => `<option${u === shown ? " selected" : ""}>${esc(u)}</option>`).join("")}</select>`
       : `<span class="u">${esc(f.unit || "")}</span>`;
     return `<div class="field${f.full ? " full" : ""}" data-field="${f.key}"><label for="${id}">${esc(label)}</label>
-      <div class="ctl"><input id="${id}" data-key="${f.key}" type="number" step="any" value="${v[f.key]}"${f.min !== undefined ? ` min="${f.min}"` : ""}${f.max !== undefined ? ` max="${f.max}"` : ""}>${unit}</div>${f.hint ? `<span class="hint">${esc(f.hint)}</span>` : ""}</div>`;
+      <div class="ctl"><input id="${id}" data-key="${f.key}" type="number" step="any" value="${dim ? displayValue(f, shown, v[f.key]) : v[f.key]}"${f.min !== undefined ? ` min="${f.min}"` : ""}${f.max !== undefined ? ` max="${f.max}"` : ""}>${unit}</div>${f.hint ? `<span class="hint">${esc(f.hint)}</span>` : ""}</div>`;
   }
   if (f.type === "fittings") {
     const row = (name, j, basis) => `<tr><td>${esc(name)}</td><td class="r"><input class="qty num" type="number" min="0" step="1" data-qty="${j}" value="${v.qty[j]}" aria-label="${esc(name)} quantity"></td><td class="num dim" id="fb-${j}">${basis}</td><td class="num" id="fk-${j}"></td></tr>`;
@@ -141,18 +156,18 @@ function renderTool(id) {
   currentTool = id;
   const t = toolById(id), d = draft(id), v = d.inputs;
   const saved = d.caseId && store.findCase(d.caseId)?.c;
-  const verNote = saved && (saved.engineVersion !== ENGINE_VERSION || saved.toolVersion !== t.version)
-    ? `<div class="banner">This case was saved with ${esc(t.short)} v${esc(saved.toolVersion)} / engine v${esc(saved.engineVersion)}. Results below are recalculated with v${esc(t.version)} / engine v${ENGINE_VERSION}${saved.headline ? `; saved headline was ${esc(saved.headline)}` : ""}.</div>` : "";
+  const verNote = saved && saved.toolVersion !== t.version
+    ? `<div class="banner">This case was saved with ${esc(t.short)} v${esc(saved.toolVersion)}. Results below are recalculated with v${esc(t.version)}${saved.headline ? `; saved headline was ${esc(saved.headline)}` : ""}.</div>` : "";
   const groupsHTML = (panel) => t.groups.filter((g) => (g.panel || "") === panel).map((g) => {
     const fs = t.fields.filter((f) => f.group === g.id);
     if (!fs.length) return "";
-    return `${g.label ? `<div class="sub">${esc(g.label)}</div>` : ""}<div class="fields">${fs.map((f) => fieldHTML(f, v)).join("")}</div>`;
+    return `${g.label ? `<div class="sub">${esc(g.label)}</div>` : ""}<div class="fields">${fs.map((f) => fieldHTML(f, v, d.units)).join("")}</div>`;
   }).join("");
   const groups = groupsHTML("");
   const eqPanel = t.groups.some((g) => g.panel === "equiv") ? equivPanelHTML(groupsHTML("equiv")) : "";
   view.innerHTML = `<section class="view">
     <div class="vhead"><div><h1>${esc(t.title)}</h1><p>${esc(t.summary)}</p></div>
-      <div class="src">Workbook sheet <b>${esc(t.sheet)}</b> · v${esc(t.version)}</div></div>
+      <div class="src">v${esc(t.version)}</div></div>
     ${verNote}
     <div class="casebar noprint">
       <input id="case-name" placeholder="Case name, e.g. Header A, max flow" value="${esc(d.caseName)}" aria-label="Case name">
@@ -188,7 +203,7 @@ function renderTool(id) {
       <p>${esc(t.method.basis)}</p>
       ${t.method.equations.map(eqHTML).join("")}
       <p><b>Assumptions and limits</b></p><ul>${t.method.assumptions.map((a) => `<li>${esc(a)}</li>`).join("")}</ul>
-      <p><b>References</b></p><ul>${t.method.references.map((a) => `<li>${esc(a)}</li>`).join("")}</ul>
+      <p><b>References</b></p><ul>${t.method.references.map((a) => `<li>${refHTML(a)}</li>`).join("")}</ul>
     </div></details>
   </section>`;
 
@@ -205,7 +220,7 @@ function renderTool(id) {
   $("case-save").addEventListener("click", () => saveCase(t, d, false));
   $("case-copy")?.addEventListener("click", () => saveCase(t, d, true));
   $("case-record").addEventListener("click", () => { location.hash = "#/record"; });
-  $("case-new").addEventListener("click", () => { drafts[id] = { inputs: defaults(t), caseId: null, caseName: "", dirty: false }; renderTool(id); renderShell(); });
+  $("case-new").addEventListener("click", () => { drafts[id] = { inputs: defaults(t), units: d.units, caseId: null, caseName: "", dirty: false }; renderTool(id); renderShell(); });
   $("case-del")?.addEventListener("click", () => {
     if (!confirm(`Delete case “${d.caseName || "Untitled"}” from this project?`)) return;
     store.deleteCase(d.caseId); d.caseId = null; renderTool(id); renderShell(); toast("Case deleted");
@@ -239,7 +254,7 @@ function equivPanelHTML(fields) {
           <li><b>Same mass flow</b>: Coriolis meters, or re-expressing a fixed mass demand in another gas's standard volume.</li>
         </ul>
         <p><b>Assumptions and limitations</b></p><ul>${m.assumptions.map((a) => `<li>${esc(a)}</li>`).join("")}</ul>
-        <p><b>References</b></p><ul>${m.references.map((a) => `<li>${esc(a)}</li>`).join("")}</ul>
+        <p><b>References</b></p><ul>${m.references.map((a) => `<li>${refHTML(a)}</li>`).join("")}</ul>
       </div></details>
     </div></section>`;
 }
@@ -266,10 +281,22 @@ function updateEquiv(eq, v) {
 
 function readForm(t, d) {
   const v = d.inputs;
+  // a changed unit keeps the quantity and redisplays it in the new unit
+  view.querySelectorAll("[data-ukey]").forEach((el) => {
+    const key = el.dataset.ukey, f = t.fields.find((x) => x.key === key);
+    if (!f || el.value === d.units[key]) return;
+    d.units[key] = el.value;
+    const inp = $(`f-${key}`); if (inp) inp.value = displayValue(f, el.value, v[key]);
+  });
   view.querySelectorAll("[data-key]").forEach((el) => {
     const f = t.fields.find((x) => x.key === el.dataset.key);
     if (!f) return;
-    if (f.type === "number") { const n = parseFloat(el.value); v[f.key] = Number.isFinite(n) ? n : 0; }
+    if (f.type === "number") {
+      const n = parseFloat(el.value), x = Number.isFinite(n) ? n : 0;
+      if (!dimOf(f)) v[f.key] = x;
+      // a converted value left as displayed keeps its exact stored value
+      else if (el.value !== displayValue(f, d.units[f.key], v[f.key])) v[f.key] = toBase(f, d.units[f.key], x);
+    }
     else v[f.key] = el.value;
   });
   view.querySelectorAll("[data-qty]").forEach((el) => { const n = parseFloat(el.value); v.qty[+el.dataset.qty] = Number.isFinite(n) ? Math.max(0, n) : 0; });
@@ -291,6 +318,7 @@ function saveCase(t, d, asNew) {
     name: (d.caseName || "").trim() || `${t.short} ${today()}`,
     toolId: t.id, toolVersion: t.version, engineVersion: ENGINE_VERSION,
     inputs: JSON.parse(JSON.stringify(d.inputs)),
+    units: { ...d.units },
     fingerprint: fingerprint(t, d.inputs),
     headline: h && r.ok ? `${resultValue(h)} ${h.unit}` : r.status.text,
   });
@@ -379,8 +407,8 @@ function renderRecord() {
     date: (saved?.updated || new Date().toISOString()).slice(0, 10),
   };
   view.innerHTML = `<section class="view">
-    <div class="vhead noprint"><div><h1>Calc record</h1><p>Fill in the purpose and sign-off, then print to PDF, paste into Word or download a CSV for Excel. The record is rebuilt from the inputs, so it always matches the tool.</p></div>
-      <div class="src">${esc(t.short)} v${esc(t.version)} · engine v${ENGINE_VERSION}</div></div>
+    <div class="vhead noprint"><div><h1>Calc record</h1><p>Fill in the purpose and sign-off, then print to PDF, paste into Word or download a CSV. The record is rebuilt from the inputs, so it always matches the tool.</p></div>
+      <div class="src">${esc(t.short)} v${esc(t.version)}</div></div>
     ${d.dirty || !d.caseId ? `<div class="banner noprint">${d.caseId ? "This case has unsaved changes." : "This case isn't saved yet."} The record shows the current inputs. Save the case to keep the record details with it.</div>` : ""}
     <div class="casebar noprint actions">
       <button class="ibtn" type="button" id="rec-back">← Back to tool</button>
@@ -403,7 +431,7 @@ function renderRecord() {
   const form = $("rec-form");
   const current = () => {
     const fd = Object.fromEntries(new FormData(form));
-    return buildRecord(t, inputs, result, { ...meta, ...fd });
+    return buildRecord(t, inputs, result, { ...meta, ...fd }, d.units);
   };
   const paint = () => { $("paper").innerHTML = recordHTML(current()); };
   form.addEventListener("input", paint);

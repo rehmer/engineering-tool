@@ -103,7 +103,6 @@ export default {
   title: "Gas Temperature Rise in Pipe",
   short: "Gas Temp Rise",
   version: "1.0.0",
-  sheet: "Gas Temp Rise in Pipe",
   summary: "Steady 1-D gas flow in a horizontal pipe, marched segment by segment with Darcy pressure loss, wall heat transfer through pipe and insulation, and a total-enthalpy energy balance.",
   groups: [
     { id: "gas", label: "" },
@@ -193,7 +192,7 @@ export default {
       "Isothermal means the outer pipe or insulation surface is held at the boundary temperature. External air film and radiation are not modelled. Adiabatic ignores all thermal inputs.",
       "Laminar Nu = 3.66 assumes fully developed flow at constant wall temperature; entrance effects are ignored.",
       "Viscosity and conductivity use low-pressure power laws. Results depend on segment count; compare 25 and 50 segments.",
-      "UA is reported in Btu/(hr·°F). The workbook's G15 omits the K-to-°F factor of 1.8, so it reads 1.8 times higher; all other results match the workbook.",
+      "UA is reported in Btu/(hr·°F).",
     ],
     references: [
       "Incropera, DeWitt, Bergman & Lavine, Fundamentals of Heat and Mass Transfer (internal convection, Dittus–Boelter, cylindrical conduction).",

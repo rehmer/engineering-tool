@@ -7,7 +7,7 @@ import { props } from "../engine/properties.js";
 
 test("every tool has the fields the app and calc record rely on", () => {
   for (const t of TOOLS) {
-    for (const k of ["id", "title", "version", "sheet", "summary", "fields", "groups", "calculate", "method"]) assert.ok(t[k], `${t.id}.${k}`);
+    for (const k of ["id", "title", "version", "summary", "fields", "groups", "calculate", "method"]) assert.ok(t[k], `${t.id}.${k}`);
     assert.match(t.version, /^\d+\.\d+\.\d+$/);
     const out = t.calculate(defaults(t));
     assert.ok(out.ok, `${t.id} defaults solve`);

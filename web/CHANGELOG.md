@@ -1,5 +1,12 @@
 # Changelog
 
+## Engine 0.4.0 (2026-11-23)
+
+- Input units: a US / SI switch in the top bar sets every input, and each input has its own unit list (pressure gauge and absolute, stress, temperature, length, area, force, line load, conductivity). The tools still calculate in their US base units, so results are unchanged. Saved cases keep their units.
+- Cv Valve Flow 2.0.0: calculate flow from Cv or Cv from flow, for a gas (ISA S75.01, unchanged) or a liquid (ANSI/ISA-75.01.01 with the choked-flow limit FL²(P₁ − FF·Pv), Fp = 1). Old cases open as gas, flow from Cv. Tested in `tests/cv-modes.test.js`.
+- References are links (DOI, publisher or standards body) on each tool and in the calc record. The two pipe-flow references now cite Kirkland (2019) and Wilson (2012).
+- The site no longer shows the engine version or the source spreadsheet; the top-bar "Free" label is gone. The guide states that page views are counted with cookieless Cloudflare Web Analytics.
+
 ## Engine 0.3.1 (2026-11-22)
 
 - Method equations are written in LaTeX and drawn as typeset math in the Theory panel, the calc record, Print / Save PDF and Copy for Word. Pasted into Word they become native, editable Word equations. No result changes.

@@ -42,7 +42,6 @@ export default {
   title: "Relief Valve Gas Capacity",
   short: "Relief Valve",
   version: "1.0.0",
-  sheet: "Relief Valve Calculator",
   summary: "Gas relieving capacity of a pressure-relief valve by the API 520 critical and subcritical equations, for an API letter orifice or a custom effective area.",
   groups: [
     { id: "gas", label: "" },
@@ -125,7 +124,7 @@ export default {
     ],
     assumptions: [
       "Gas phase only. Pressures in the equations are absolute; the back pressure is entered in psia.",
-      "Kb is applied in the critical equation only, as in the worksheet; the subcritical equation applies Kd and Kc.",
+      "Kb is applied in the critical equation only; the subcritical equation applies Kd and Kc.",
       "k and Z come from the selected property method at relieving conditions. Manual Z uses ideal-gas heat capacities for k.",
       "Effective areas are the API 526 letter designations. Use the certified area and Kd for the actual valve when known.",
     ],

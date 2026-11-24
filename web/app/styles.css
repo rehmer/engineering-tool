@@ -242,3 +242,12 @@ select option,select optgroup{background-color:var(--surface);color:var(--ink)}
 .guide .prose p{margin:0}
 .guide td a{color:var(--brand);font-weight:600}
 @media (max-width:760px){.fbbtn{padding:5px 8px}}
+
+/* input unit system switch (US / SI) */
+.usys{display:inline-flex;align-items:center;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;font-size:12px}
+.usys span{padding:4px 8px;color:var(--muted);border-right:1px solid var(--line)}
+.usys button{font:inherit;font-weight:600;background:var(--surface);color:var(--muted);border:0;padding:4px 10px;cursor:pointer}
+.usys button+button{border-left:1px solid var(--line)}
+.usys button[aria-pressed="true"]{background:var(--brand);color:var(--surface)}
+.ctl input{min-width:5.5em}
+.ctl select.u{max-width:45%;min-width:0;text-overflow:ellipsis}
